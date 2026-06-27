@@ -1,0 +1,35 @@
+{
+  "name": "InvestIQ — Yatırım Karar Destek Sistemi",
+  "short_name": "InvestIQ",
+  "description": "Finansal analiz yöntemlerini birleştiren akıllı yatırım karar destek sistemi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#0B1120",
+  "orientation": "portrait-primary",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Yeni Analiz",
+      "short_name": "Analiz",
+      "url": "/?page=income",
+      "description": "Yeni şirket analizi başlat"
+    }
+  ]
+}

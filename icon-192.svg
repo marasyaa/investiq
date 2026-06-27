@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="40" fill="#0B1120"/>
+  <rect x="16" y="16" width="160" height="160" rx="28" fill="#111827"/>
+  <!-- Gradient background accent -->
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <!-- Bar chart bars -->
+  <rect x="42" y="110" width="22" height="46" rx="4" fill="#1E293B"/>
+  <rect x="72" y="88" width="22" height="68" rx="4" fill="#1E293B"/>
+  <rect x="102" y="68" width="22" height="88" rx="4" fill="#1E293B"/>
+  <rect x="132" y="44" width="22" height="112" rx="4" fill="url(#g1)"/>
+  <!-- Trend line -->
+  <polyline points="53,112 83,90 113,70 143,46" stroke="#06B6D4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- IQ text -->
+  <text x="96" y="162" font-family="'Space Grotesk', sans-serif" font-size="22" font-weight="700" fill="#3B82F6" text-anchor="middle" letter-spacing="2">IQ</text>
+</svg>

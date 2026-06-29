@@ -631,125 +631,149 @@ window.addEventListener('DOMContentLoaded',loadSaved);
   const status=document.getElementById('fetchStatus');
   const btn=document.getElementById('fetchBtn');
   btn.textContent='⏳ Yukleniyor...';btn.disabled=true;
-  status.textContent='Yahoo Finance den veri cekiliyor: '+ticker;
+  status.textContent='Veri cekiliyor: '+ticker+'...';
   const modules='incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,summaryDetail,defaultKeyStatistics,financialData';
-  const url='https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+ticker+'?modules='+modules;
+  const url='https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+ticker+'?modules='+modules+'&lang=en&region=TR';
   const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
   fetch(proxy)
-    .then(r=>r.json())
+    .then(r=>{if(!r.ok)throw new Error('Ag hatasi');return r.json();})
     .then(data=>{
-      const contents=JSON.parse(data.contents);
-      if(contents.quoteSummary&&contents.quoteSummary.error){
-        throw new Error(contents.quoteSummary.error.description||'Sembol bulunamadi');
-      }
-      const res=contents.quoteSummary.result[0];
-      fillFromYahoo(res,ticker);
-      btn.textContent='✅ Veri Yuklendi';
-      status.textContent=ticker+' verileri basariyla yuklendi. Eksik alanlar varsa manuel girin.';
+      let parsed;
+      try{parsed=JSON.parse(data.contents);}catch(e){throw new Error('Veri parse edilemedi');}
+      if(!parsed||!parsed.quoteSummary){throw new Error('Yahoo yaniti bos');}
+      if(parsed.quoteSummary.error){throw new Error(parsed.quoteSummary.error.description||'Yahoo hatasi');}
+      const result=parsed.quoteSummary.result;
+      if(!result||!result[0]){throw new Error('Sembol bulunamadi: '+ticker);}
+      fillFromYahoo(result[0],ticker);
+      btn.textContent='✅ Yuklendi';btn.disabled=false;
+      status.textContent=ticker+' verileri yuklendi. Eksik alanlar varsa manuel girin.';
       showToast('Veriler yuklendi!','✅');
     })
     .catch(err=>{
       btn.textContent='⬇️ Veri Cek';btn.disabled=false;
-      status.textContent='Hata: '+err.message+'. Sembol dogru mu? (or. THYAO, EREGL)';
-      showToast('Veri cekilemedi: '+err.message,'❌');
+      status.textContent='Hata: '+err.message;
+      showToast('Hata: '+err.message,'❌');
     });
 }
 
 function fillFromYahoo(res,ticker){
-  const btn=document.getElementById('fetchBtn');
-  btn.textContent='⬇️ Veri Cek';btn.disabled=false;
+  const set=(id,val)=>{
+    if(val===null||val===undefined||val===0)return;
+    const el=document.getElementById(id);
+    if(el)el.value=Math.round(val/1000);
+  };
+  const setRaw=(id,val)=>{
+    if(val===null||val===undefined)return;
+    const el=document.getElementById(id);
+    if(el)el.value=val;
+  };
+  const gR=(obj,key)=>{
+    if(!obj||!obj[key])return null;
+    return obj[key].raw||null;
+  };
 
-  // Yardimci: alani doldur
-  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==null&&val!==undefined&&val!==0)el.value=Math.round(val/1000);};
-  const setRaw=(id,val)=>{const el=document.getElementById(id);if(el&&val!==null&&val!==undefined)el.value=val;};
-
-  // Gelir Tablosu — son 2 donem
-  const inc=res.incomeStatementHistory&&res.incomeStatementHistory.incomeStatementHistory;
-  if(inc&&inc.length>=1){
-    const d2=inc[0]; // en son donem
-    const d1=inc[1]||{}; // bir onceki donem
-    set('revenue2',d2.totalRevenue&&d2.totalRevenue.raw);
-    set('revenue1',d1.totalRevenue&&d1.totalRevenue.raw);
-    set('cogs2',d2.costOfRevenue&&d2.costOfRevenue.raw);
-    set('cogs1',d1.costOfRevenue&&d1.costOfRevenue.raw);
-    set('opex2',d2.totalOperatingExpenses&&d2.totalOperatingExpenses.raw&&
-      d2.totalRevenue&&d2.costOfRevenue?
-      d2.totalOperatingExpenses.raw-d2.costOfRevenue.raw:null);
-    set('interest2',d2.interestExpense&&Math.abs(d2.interestExpense.raw));
-    set('interest1',d1.interestExpense&&Math.abs(d1.interestExpense.raw));
-    set('ebt2',d2.pretaxIncome&&d2.pretaxIncome.raw);
-    set('ebt1',d1.pretaxIncome&&d1.pretaxIncome.raw);
-    set('netincome2',d2.netIncome&&d2.netIncome.raw);
-    set('netincome1',d1.netIncome&&d1.netIncome.raw);
-
-    // Donem yillari
-    if(d2.endDate&&d2.endDate.fmt){
-      const y2=d2.endDate.fmt.split('-')[0];
-      setRaw('year2',y2);
+  // Gelir Tablosu
+  try{
+    const inc=res.incomeStatementHistory&&res.incomeStatementHistory.incomeStatementHistory;
+    if(inc&&inc.length>0){
+      const d2=inc[0]||{};
+      const d1=inc[1]||{};
+      set('revenue2',gR(d2,'totalRevenue'));
+      set('revenue1',gR(d1,'totalRevenue'));
+      set('cogs2',gR(d2,'costOfRevenue'));
+      set('cogs1',gR(d1,'costOfRevenue'));
+      set('netincome2',gR(d2,'netIncome'));
+      set('netincome1',gR(d1,'netIncome'));
+      set('ebt2',gR(d2,'pretaxIncome'));
+      set('ebt1',gR(d1,'pretaxIncome'));
+      const int2=gR(d2,'interestExpense');
+      if(int2)set('interest2',Math.abs(int2));
+      const int1=gR(d1,'interestExpense');
+      if(int1)set('interest1',Math.abs(int1));
+      if(d2.endDate&&d2.endDate.fmt)setRaw('year2',d2.endDate.fmt.split('-')[0]);
+      if(d1.endDate&&d1.endDate.fmt)setRaw('year1',d1.endDate.fmt.split('-')[0]);
     }
-    if(d1.endDate&&d1.endDate.fmt){
-      const y1=d1.endDate.fmt.split('-')[0];
-      setRaw('year1',y1);
+  }catch(e){console.warn('Gelir tablosu hatasi',e);}
+
+  // Bilanco
+  try{
+    const bal=res.balanceSheetHistory&&res.balanceSheetHistory.balanceSheetStatements;
+    if(bal&&bal.length>0){
+      const d2=bal[0]||{};
+      const d1=bal[1]||{};
+      set('cash2',gR(d2,'cash'));
+      set('cash1',gR(d1,'cash'));
+      set('receivables2',gR(d2,'netReceivables'));
+      set('receivables1',gR(d1,'netReceivables'));
+      set('inventory2',gR(d2,'inventory'));
+      set('inventory1',gR(d1,'inventory'));
+      set('currentassets2',gR(d2,'totalCurrentAssets'));
+      set('currentassets1',gR(d1,'totalCurrentAssets'));
+      set('ppe2',gR(d2,'propertyPlantEquipment'));
+      set('ppe1',gR(d1,'propertyPlantEquipment'));
+      set('totalassets2',gR(d2,'totalAssets'));
+      set('totalassets1',gR(d1,'totalAssets'));
+      const sd2=gR(d2,'shortTermDebt')||gR(d2,'shortLongTermDebt');
+      if(sd2)set('shortdebt2',sd2);
+      const sd1=gR(d1,'shortTermDebt')||gR(d1,'shortLongTermDebt');
+      if(sd1)set('shortdebt1',sd1);
+      set('payables2',gR(d2,'accountsPayable'));
+      set('payables1',gR(d1,'accountsPayable'));
+      set('currentliabilities2',gR(d2,'totalCurrentLiabilities'));
+      set('currentliabilities1',gR(d1,'totalCurrentLiabilities'));
+      set('longdebt2',gR(d2,'longTermDebt'));
+      set('longdebt1',gR(d1,'longTermDebt'));
+      set('totalliabilities2',gR(d2,'totalLiab'));
+      set('totalliabilities1',gR(d1,'totalLiab'));
+      set('equity2',gR(d2,'totalStockholderEquity'));
+      set('equity1',gR(d1,'totalStockholderEquity'));
     }
-  }
+  }catch(e){console.warn('Bilanco hatasi',e);}
 
-  // Bilanco — son 2 donem
-  const bal=res.balanceSheetHistory&&res.balanceSheetHistory.balanceSheetStatements;
-  if(bal&&bal.length>=1){
-    const d2=bal[0];const d1=bal[1]||{};
-    const gR=(obj,key)=>obj[key]&&obj[key].raw;
-    set('cash2',gR(d2,'cash'));set('cash1',gR(d1,'cash'));
-    set('receivables2',gR(d2,'netReceivables'));set('receivables1',gR(d1,'netReceivables'));
-    set('inventory2',gR(d2,'inventory'));set('inventory1',gR(d1,'inventory'));
-    set('currentassets2',gR(d2,'totalCurrentAssets'));set('currentassets1',gR(d1,'totalCurrentAssets'));
-    set('ppe2',gR(d2,'propertyPlantEquipment'));set('ppe1',gR(d1,'propertyPlantEquipment'));
-    set('totalassets2',gR(d2,'totalAssets'));set('totalassets1',gR(d1,'totalAssets'));
-    set('shortdebt2',gR(d2,'shortTermDebt')||gR(d2,'shortLongTermDebt'));
-    set('shortdebt1',gR(d1,'shortTermDebt')||gR(d1,'shortLongTermDebt'));
-    set('payables2',gR(d2,'accountsPayable'));set('payables1',gR(d1,'accountsPayable'));
-    set('currentliabilities2',gR(d2,'totalCurrentLiabilities'));set('currentliabilities1',gR(d1,'totalCurrentLiabilities'));
-    set('longdebt2',gR(d2,'longTermDebt'));set('longdebt1',gR(d1,'longTermDebt'));
-    set('totalliabilities2',gR(d2,'totalLiab'));set('totalliabilities1',gR(d1,'totalLiab'));
-    set('equity2',gR(d2,'totalStockholderEquity'));set('equity1',gR(d1,'totalStockholderEquity'));
-  }
+  // Nakit Akisi
+  try{
+    const cf=res.cashflowStatementHistory&&res.cashflowStatementHistory.cashflowStatements;
+    if(cf&&cf.length>0){
+      const d2=cf[0]||{};
+      const d1=cf[1]||{};
+      set('cfo2',gR(d2,'totalCashFromOperatingActivities'));
+      set('cfo1',gR(d1,'totalCashFromOperatingActivities'));
+      const cx2=gR(d2,'capitalExpenditures');
+      if(cx2)set('capex2',cx2);
+      const cx1=gR(d1,'capitalExpenditures');
+      if(cx1)set('capex1',cx1);
+      set('cfi2',gR(d2,'totalCashflowsFromInvestingActivities'));
+      set('cfi1',gR(d1,'totalCashflowsFromInvestingActivities'));
+      set('cff2',gR(d2,'totalCashFromFinancingActivities'));
+      set('cff1',gR(d1,'totalCashFromFinancingActivities'));
+      const div2=gR(d2,'dividendsPaid');
+      if(div2)set('dividends2',Math.abs(div2));
+    }
+  }catch(e){console.warn('Nakit akisi hatasi',e);}
 
-  // Nakit Akisi — son 2 donem
-  const cf=res.cashflowStatementHistory&&res.cashflowStatementHistory.cashflowStatements;
-  if(cf&&cf.length>=1){
-    const d2=cf[0];const d1=cf[1]||{};
-    const gR=(obj,key)=>obj[key]&&obj[key].raw;
-    set('cfo2',gR(d2,'totalCashFromOperatingActivities'));
-    set('cfo1',gR(d1,'totalCashFromOperatingActivities'));
-    set('capex2',gR(d2,'capitalExpenditures'));
-    set('capex1',gR(d1,'capitalExpenditures'));
-    set('cfi2',gR(d2,'totalCashflowsFromInvestingActivities'));
-    set('cfi1',gR(d1,'totalCashflowsFromInvestingActivities'));
-    set('cff2',gR(d2,'totalCashFromFinancingActivities'));
-    set('cff1',gR(d1,'totalCashFromFinancingActivities'));
-    set('dividends2',gR(d2,'dividendsPaid')&&Math.abs(gR(d2,'dividendsPaid')));
-  }
+  // Hisse fiyati ve adet
+  try{
+    const sd=res.summaryDetail;
+    const ks=res.defaultKeyStatistics;
+    const fd=res.financialData;
+    if(sd){
+      const price=gR(sd,'regularMarketPrice')||gR(sd,'previousClose');
+      if(price){const el=document.getElementById('stockprice');if(el)el.value=price;}
+    }
+    if(ks&&gR(ks,'sharesOutstanding')){
+      const el=document.getElementById('shares2');
+      if(el)el.value=Math.round(gR(ks,'sharesOutstanding')/1000);
+    }
+    if(fd&&gR(fd,'ebitda')){
+      const el=document.getElementById('ebitda2');
+      if(el&&!el.value)el.value=Math.round(gR(fd,'ebitda')/1000);
+    }
+  }catch(e){console.warn('Ozet veri hatasi',e);}
 
-  // Ozet veriler — hisse fiyati, adet vb.
-  const sd=res.summaryDetail;
-  const ks=res.defaultKeyStatistics;
-  const fd=res.financialData;
-  if(sd&&sd.previousClose){
-    const el=document.getElementById('stockprice');
-    if(el)el.value=sd.previousClose.raw||sd.regularMarketPrice&&sd.regularMarketPrice.raw||'';
-  }
-  if(ks&&ks.sharesOutstanding){
-    const el=document.getElementById('shares2');
-    if(el)el.value=Math.round(ks.sharesOutstanding.raw/1000);
-  }
-  if(fd&&fd.ebitda){
-    const el2=document.getElementById('ebitda2');
-    if(el2&&!el2.value)el2.value=Math.round(fd.ebitda.raw/1000);
-  }
-
-  // Sirket adini guncelle (geri yazma)
+  // Sembol guncelle
   const nameEl=document.getElementById('company_name');
-  if(nameEl&&!nameEl.value.includes('.'))nameEl.value=ticker.replace('.IS','');
-  }
+  if(nameEl)nameEl.value=ticker.replace('.IS','');
+     }
 </script>
 </body>
 </html>

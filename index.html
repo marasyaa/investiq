@@ -637,12 +637,12 @@ async function fetchYahoo(){
   try{
     const base='https://financialmodelingprep.com/api/v3';
     const [inc,bal,cf,quote,kstat]=await Promise.all([
-      fetch(`${base}/income-statement?symbol=${ticker}&limit=2&apikey=${FMP_KEY}`).then(r=>r.json()),
-      fetch(`${base}/balance-sheet-statement?symbol=${ticker}&limit=2&apikey=${FMP_KEY}`).then(r=>r.json()),
-      fetch(`${base}/cash-flow-statement?symbol=${ticker}&limit=2&apikey=${FMP_KEY}`).then(r=>r.json()),
-      fetch(`${base}/quote?symbol=${ticker}&apikey=${FMP_KEY}`).then(r=>r.json()),
-      fetch(`${base}/key-metrics?symbol=${ticker}&limit=1&apikey=${FMP_KEY}`).then(r=>r.json()),
     ]);
+    fetch(`${base}/financials/income-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
+    fetch(`${base}/financials/balance-sheet-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
+    fetch(`${base}/financials/cash-flow-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
+    fetch(`${base}/quote/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
+    fetch(`${base}/key-metrics/${ticker}?limit=1&apikey=${FMP_KEY}`).then(r=>r.json()),
     if(!inc||inc.length===0) throw new Error('Sembol bulunamadi: '+ticker+'. BIST sembolune .IS eklenmeli mi?');
     fillFMP(inc,bal,cf,quote,kstat,ticker);
     btn.textContent='✅ Yuklendi';btn.disabled=false;

@@ -637,7 +637,7 @@ async function fetchYahoo(){
   try{
     const base='https://financialmodelingprep.com/api/v3';
     const [inc,bal,cf,quote,kstat]=await Promise.all([
-    ]);
+ ]);
     fetch(`${base}/financials/income-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
     fetch(`${base}/financials/balance-sheet-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),
     fetch(`${base}/financials/cash-flow-statement/${ticker}?apikey=${FMP_KEY}`).then(r=>r.json()),

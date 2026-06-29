@@ -140,220 +140,8 @@ body{background:var(--bg-base);color:var(--text-primary);font-family:var(--font-
   .btn-group{flex-direction:column;}.btn{justify-content:center;}
   .score-breakdown{grid-template-columns:1fr 1fr;}.ratio-grid{grid-template-columns:1fr 1fr;}
 }
-         </style>
-         </head>
-<body>
-<div class="app">
-<header class="header">
-  <div class="logo"><div class="logo-mark">IQ</div><span>Invest<span class="logo-sub">IQ</span></span></div>
-  <span class="header-badge">v2.0</span>
-</header>
-<nav class="nav">
-  <button class="nav-btn active" onclick="showPage('welcome',this)">🏠 Ana Sayfa</button>
-  <button class="nav-btn" id="nav-income" onclick="showPage('income',this)">📊 Gelir <span class="nav-dot"></span></button>
-  <button class="nav-btn" id="nav-balance" onclick="showPage('balance',this)">🏦 Bilanco <span class="nav-dot"></span></button>
-  <button class="nav-btn" id="nav-cashflow" onclick="showPage('cashflow',this)">💸 Nakit <span class="nav-dot"></span></button>
-  <button class="nav-btn" id="nav-analysis" onclick="showPage('analysis',this)">🔬 Analiz <span class="nav-dot"></span></button>
-</nav>
-<main class="main">
-
-<section class="page active" id="page-welcome">
-  <div class="welcome">
-    <div class="welcome-icon">📈</div>
-    <h1 class="welcome-title">Invest<span>IQ</span></h1>
-    <p class="welcome-desc">8 finansal analiz yontemini birlestiren, kesinlik iddia etmeden yuksek guven skoruyla yatirim karari sunan akilli sistem.</p>
-    <div class="welcome-features">
-      <div class="feature-card"><div class="feature-icon">📐</div><div class="feature-title">20+ Rasyo</div><div class="feature-desc">Likidite, karlilik, faaliyet ve kaldirac oranlari</div></div>
-      <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Guven Skoru</div><div class="feature-desc">Agirlikli 0-100 puan sistemi</div></div>
-      <div class="feature-card"><div class="feature-icon">📉</div><div class="feature-title">DCF Modeli</div><div class="feature-desc">Icsel deger ve piyasa karsilastirmasi</div></div>
-      <div class="feature-card"><div class="feature-icon">🚦</div><div class="feature-title">Karar Raporu</div><div class="feature-desc">Al / Bekle / Sat onerisi ve gerekcesi</div></div>
-    </div>
-    <button class="btn btn-primary" style="font-size:14px;padding:12px 28px" onclick="showPage('income',document.getElementById('nav-income'))">Analize Basla →</button>
-  </div>
-</section>
-
-<section class="page" id="page-income">
-  <div class="section-header">
-    <div class="section-label">Adim 1 / 3</div>
-    <h2 class="section-title">Gelir Tablosu</h2>
-    <p class="section-desc">Son 2 yila ait gelir tablosu verilerini girin. Tum degerler TL Bin.</p>
-  </div>
-  <div class="progress-bar">
-    <div class="progress-step active"><div class="step-circle">1</div><span>Gelir</span></div>
-    <div class="progress-connector"></div>
-    <div class="progress-step"><div class="step-circle">2</div><span>Bilanco</span></div>
-    <div class="progress-connector"></div>
-    <div class="progress-step"><div class="step-circle">3</div><span>Nakit</span></div>
-    <div class="progress-connector"></div>
-    <div class="progress-step"><div class="step-circle">4</div><span>Analiz</span></div>
-  </div>
-  <div class="info-box"><span class="info-box-icon">💡</span><span>Degerleri TL Bin olarak girin. Bos birakilan alanlar hesaplamanin disinda tutulur.</span></div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon blue">🏢</div>Sirket Bilgileri</div>
-    <div class="form-grid">
-      <div class="form-group" style="grid-column:1/-1">
-  <label class="form-label">Sirket / Sembol (Borsa Istanbul)</label>
-  <div style="display:flex;gap:8px">
-    <input class="form-input" id="company_name" placeholder="or. THYAO, EREGL, SISE" style="flex:1"/>
-    <button class="btn btn-primary" onclick="fetchYahoo()" style="padding:9px 14px;white-space:nowrap" id="fetchBtn">
-      ⬇️ Veri Cek
-    </button>
-  </div>
-  <span class="form-hint" id="fetchStatus">Sembol girin ve "Veri Cek" butonuna basin. Borsa Istanbul hisseleri icin .IS otomatik eklenir.</span>
-      </div>
-      <div class="form-group"><label class="form-label">Donem 1 (Onceki)</label><input class="form-input" type="number" id="year1" placeholder="2022"/></div>
-      <div class="form-group"><label class="form-label">Donem 2 (Son)</label><input class="form-input" type="number" id="year2" placeholder="2023"/></div>
-      <div class="form-group"><label class="form-label">Sektor</label>
-        <select class="form-input" id="sector">
-          <option value="">Seciniz...</option>
-          <option value="manufacturing">Uretim / Sanayi</option>
-          <option value="retail">Perakende</option>
-          <option value="technology">Teknoloji</option>
-          <option value="finance">Finans</option>
-          <option value="energy">Enerji</option>
-          <option value="healthcare">Saglik</option>
-          <option value="construction">Insaat / GYO</option>
-          <option value="other">Diger</option>
-        </select>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon blue">💰</div>Gelir ve Kar (TL Bin)</div>
-    <div class="form-subtitle">Satislar ve Maliyet</div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Net Satislar D1</label><input class="form-input" type="number" id="revenue1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Net Satislar D2</label><input class="form-input" type="number" id="revenue2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Satis Maliyeti D1</label><input class="form-input" type="number" id="cogs1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Satis Maliyeti D2</label><input class="form-input" type="number" id="cogs2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Faaliyet Giderleri D1</label><input class="form-input" type="number" id="opex1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Faaliyet Giderleri D2</label><input class="form-input" type="number" id="opex2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">FAVOK / EBITDA D1</label><input class="form-input" type="number" id="ebitda1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">FAVOK / EBITDA D2</label><input class="form-input" type="number" id="ebitda2" placeholder="0"/></div>
-    </div>
-    <hr class="form-divider"/>
-    <div class="form-subtitle">Net Kar</div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Finansman Gideri D1</label><input class="form-input" type="number" id="interest1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Finansman Gideri D2</label><input class="form-input" type="number" id="interest2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D1</label><input class="form-input" type="number" id="ebt1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D2</label><input class="form-input" type="number" id="ebt2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Net Kar D1</label><input class="form-input" type="number" id="netincome1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Net Kar D2</label><input class="form-input" type="number" id="netincome2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Amortisman D1</label><input class="form-input" type="number" id="da1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Amortisman D2</label><input class="form-input" type="number" id="da2" placeholder="0"/></div>
-    </div>
-  </div>
-  <div class="btn-group">
-    <button class="btn btn-primary" onclick="saveIncome()">Kaydet ve Devam →</button>
-    <button class="btn btn-secondary" onclick="clearSection('income')">Temizle</button>
-  </div>
-</section>
-
-<section class="page" id="page-balance">
-  <div class="section-header">
-    <div class="section-label">Adim 2 / 3</div>
-    <h2 class="section-title">Bilanco</h2>
-    <p class="section-desc">Varlik, borc ve ozkaynak verileri. TL Bin cinsinden.</p>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon teal">🏗️</div>Donen Varliklar (TL Bin)</div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Nakit D1</label><input class="form-input" type="number" id="cash1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Nakit D2</label><input class="form-input" type="number" id="cash2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ticari Alacaklar D1</label><input class="form-input" type="number" id="receivables1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ticari Alacaklar D2</label><input class="form-input" type="number" id="receivables2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Stoklar D1</label><input class="form-input" type="number" id="inventory1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Stoklar D2</label><input class="form-input" type="number" id="inventory2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Donen Varlik D1</label><input class="form-input" type="number" id="currentassets1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Donen Varlik D2</label><input class="form-input" type="number" id="currentassets2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Maddi Duran Varlik D1</label><input class="form-input" type="number" id="ppe1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Maddi Duran Varlik D2</label><input class="form-input" type="number" id="ppe2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Varlik D1</label><input class="form-input" type="number" id="totalassets1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Varlik D2</label><input class="form-input" type="number" id="totalassets2" placeholder="0"/></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon teal">📋</div>Borclar ve Ozkaynaklar (TL Bin)</div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="shortdebt1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="shortdebt2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ticari Borclar D1</label><input class="form-input" type="number" id="payables1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ticari Borclar D2</label><input class="form-input" type="number" id="payables2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D1</label><input class="form-input" type="number" id="currentliabilities1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D2</label><input class="form-input" type="number" id="currentliabilities2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="longdebt1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="longdebt2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Borc D1</label><input class="form-input" type="number" id="totalliabilities1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Toplam Borc D2</label><input class="form-input" type="number" id="totalliabilities2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ozkaynaklar D1</label><input class="form-input" type="number" id="equity1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Ozkaynaklar D2</label><input class="form-input" type="number" id="equity2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Hisse Sayisi (Bin adet)</label><input class="form-input" type="number" id="shares2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Guncel Hisse Fiyati (TL)</label><input class="form-input" type="number" id="stockprice" placeholder="42.50"/></div>
-    </div>
-  </div>
-  <div class="btn-group">
-    <button class="btn btn-secondary" onclick="showPage('income',document.getElementById('nav-income'))">← Geri</button>
-    <button class="btn btn-primary" onclick="saveBalance()">Kaydet ve Devam →</button>
-  </div>
-</section>
-
-<section class="page" id="page-cashflow">
-  <div class="section-header">
-    <div class="section-label">Adim 3 / 3</div>
-    <h2 class="section-title">Nakit Akis Tablosu</h2>
-    <p class="section-desc">Nakit akislari ve DCF model parametreleri. TL Bin cinsinden.</p>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon green">🔄</div>Nakit Akislari (TL Bin)</div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Isletme NCF D1</label><input class="form-input" type="number" id="cfo1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Isletme NCF D2</label><input class="form-input" type="number" id="cfo2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">CapEx D1</label><input class="form-input" type="number" id="capex1" placeholder="negatif girin"/></div>
-      <div class="form-group"><label class="form-label">CapEx D2</label><input class="form-input" type="number" id="capex2" placeholder="negatif girin"/></div>
-      <div class="form-group"><label class="form-label">Yatirim NCF D1</label><input class="form-input" type="number" id="cfi1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Yatirim NCF D2</label><input class="form-input" type="number" id="cfi2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Finansman NCF D1</label><input class="form-input" type="number" id="cff1" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Finansman NCF D2</label><input class="form-input" type="number" id="cff2" placeholder="0"/></div>
-      <div class="form-group"><label class="form-label">Odenen Temettu D2</label><input class="form-input" type="number" id="dividends2" placeholder="0"/></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title"><div class="card-icon purple">⚙️</div>DCF Model Parametreleri</div>
-    <div class="info-box" style="margin-bottom:14px"><span class="info-box-icon">📌</span><span>Turkiye piyasasi icin tipik degerler: WACC %15-25, Terminal buyume %3-6</span></div>
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">Iskonto Orani / WACC (%)</label><input class="form-input" type="number" id="wacc" placeholder="18"/></div>
-      <div class="form-group"><label class="form-label">Terminal Buyume Orani (%)</label><input class="form-input" type="number" id="termgrowth" placeholder="5"/></div>
-      <div class="form-group"><label class="form-label">Projeksiyon Yili</label><input class="form-input" type="number" id="projyears" placeholder="5" min="3" max="10"/></div>
-      <div class="form-group"><label class="form-label">Yillik FCF Buyume Tahmini (%)</label><input class="form-input" type="number" id="fcfgrowth" placeholder="12"/></div>
-    </div>
-  </div>
-  <div class="btn-group">
-    <button class="btn btn-secondary" onclick="showPage('balance',document.getElementById('nav-balance'))">← Geri</button>
-    <button class="btn btn-success" onclick="saveCashflowAndAnalyze()">✓ Analizi Calistir</button>
-  </div>
-</section>
-
-<section class="page" id="page-analysis">
-  <div class="section-header">
-    <div class="section-label">Sonuc Raporu</div>
-    <h2 class="section-title" id="analysis-title">Finansal Analiz</h2>
-    <p class="section-desc" id="analysis-subtitle">Veri girisini tamamlayarak analizi baslatin.</p>
-  </div>
-  <div id="analysis-content">
-    <div class="card" style="text-align:center;padding:40px">
-      <div style="font-size:44px;margin-bottom:14px">🔬</div>
-      <div style="font-family:var(--font-display);font-size:17px;font-weight:600;margin-bottom:8px">Henuz Veri Girilmedi</div>
-      <div style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">3 adimi tamamlayip Analizi Calistir butonuna basin.</div>
-      <button class="btn btn-primary" onclick="showPage('income',document.getElementById('nav-income'))">Veri Girisine Git →</button>
-    </div>
-  </div>
-</section>
-
-</main>
-</div>
-<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg">Kaydedildi</span></div>
-</head>
+     </style>
+     </head>
 <body>
 <div class="app">
 <header class="header">
@@ -556,3 +344,403 @@ body{background:var(--bg-base);color:var(--text-primary);font-family:var(--font-
 </main>
 </div>
 <div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg">Kaydedildi</span></div>
+<script>
+const S={income:null,balance:null,cashflow:null};
+function showPage(name,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');if(btn)btn.classList.add('active');}
+function showToast(msg,icon='✓'){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;document.getElementById('toast-icon').textContent=icon;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function g(id){const el=document.getElementById(id);if(!el)return null;if(el.tagName==='SELECT')return el.value||null;return el.type==='number'?(parseFloat(el.value)||null):(el.value.trim()||null);}
+function fmt(n,dec=1){if(n===null||n===undefined||isNaN(n))return '—';if(Math.abs(n)>=1e6)return (n/1e6).toFixed(dec)+'M';if(Math.abs(n)>=1e3)return (n/1e3).toFixed(dec)+'K';return n.toFixed(dec);}
+function pct(n){return n===null||isNaN(n)?'—':n.toFixed(1)+'%';}
+function ratio(n){return n===null||isNaN(n)?'—':n.toFixed(2)+'x';}
+function markNavDone(id){const b=document.getElementById(id);if(b)b.classList.add('has-data');}
+function clearSection(s){if(!confirm('Bu bolumun verilerini temizlemek istiyor musun?'))return;document.querySelectorAll('#page-'+s+' input, #page-'+s+' select').forEach(i=>i.value='');showToast('Temizlendi','🗑️');}
+
+function saveIncome(){
+  if(!g('revenue2')){showToast('Net Satislar D2 zorunlu','⚠️');return;}
+  S.income={company:g('company_name'),year1:g('year1'),year2:g('year2'),sector:g('sector'),
+    revenue:[g('revenue1'),g('revenue2')],cogs:[g('cogs1'),g('cogs2')],
+    opex:[g('opex1'),g('opex2')],ebitda:[g('ebitda1'),g('ebitda2')],
+    interest:[g('interest1'),g('interest2')],ebt:[g('ebt1'),g('ebt2')],
+    netincome:[g('netincome1'),g('netincome2')],da:[g('da1'),g('da2')]};
+  localStorage.setItem('iq_income',JSON.stringify(S.income));
+  markNavDone('nav-income');showToast('Gelir tablosu kaydedildi ✓');
+  showPage('balance',document.getElementById('nav-balance'));
+}
+
+function saveBalance(){
+  if(!g('totalassets2')){showToast('Toplam Varlik D2 zorunlu','⚠️');return;}
+  S.balance={cash:[g('cash1'),g('cash2')],receivables:[g('receivables1'),g('receivables2')],
+    inventory:[g('inventory1'),g('inventory2')],currentassets:[g('currentassets1'),g('currentassets2')],
+    ppe:[g('ppe1'),g('ppe2')],totalassets:[g('totalassets1'),g('totalassets2')],
+    shortdebt:[g('shortdebt1'),g('shortdebt2')],payables:[g('payables1'),g('payables2')],
+    currentliabilities:[g('currentliabilities1'),g('currentliabilities2')],
+    longdebt:[g('longdebt1'),g('longdebt2')],totalliabilities:[g('totalliabilities1'),g('totalliabilities2')],
+    equity:[g('equity1'),g('equity2')],shares:g('shares2'),stockprice:g('stockprice')};
+  localStorage.setItem('iq_balance',JSON.stringify(S.balance));
+  markNavDone('nav-balance');showToast('Bilanco kaydedildi ✓');
+  showPage('cashflow',document.getElementById('nav-cashflow'));
+}
+
+function saveCashflowAndAnalyze(){
+  if(!g('cfo2')){showToast('Isletme NCF D2 zorunlu','⚠️');return;}
+  S.cashflow={cfo:[g('cfo1'),g('cfo2')],capex:[g('capex1'),g('capex2')],
+    cfi:[g('cfi1'),g('cfi2')],cff:[g('cff1'),g('cff2')],dividends:g('dividends2'),
+    wacc:g('wacc')||18,termgrowth:g('termgrowth')||5,projyears:g('projyears')||5,fcfgrowth:g('fcfgrowth')||10};
+  localStorage.setItem('iq_cashflow',JSON.stringify(S.cashflow));
+  markNavDone('nav-cashflow');showToast('Analiz calistiriliyor...','🚀');
+  setTimeout(()=>{runAnalysis();showPage('analysis',document.getElementById('nav-analysis'));},600);
+}
+
+function runAnalysis(){
+  const I=S.income,B=S.balance,C=S.cashflow;if(!I||!B||!C)return;
+  const r={};
+  const rev1=I.revenue[0],rev2=I.revenue[1],cogs2=I.cogs[1],ni2=I.netincome[1];
+  const ebitda2=I.ebitda[1]||(rev2&&cogs2?rev2-cogs2-(I.opex[1]||0):null);
+  const int2=I.interest[1];
+  const ca2=B.currentassets[1],inv2=B.inventory[1],cash2=B.cash[1];
+  const rec2=B.receivables[1],ta2=B.totalassets[1],ta1=B.totalassets[0];
+  const cl2=B.currentliabilities[1],eq2=B.equity[1],eq1=B.equity[0];
+  const sd2=B.shortdebt[1]||0,ld2=B.longdebt[1]||0,pay2=B.payables[1];
+  const cfo2=C.cfo[1],capex2=C.capex[1]||0,fcf2=cfo2+capex2;
+  const sp=B.stockprice,shares=B.shares,mktcap=sp&&shares?sp*shares:null;
+
+  r.currentRatio=ca2&&cl2?ca2/cl2:null;
+  r.quickRatio=ca2&&inv2&&cl2?(ca2-inv2)/cl2:null;
+  r.cashRatio=cash2&&cl2?cash2/cl2:null;
+  r.grossMargin=rev2&&cogs2?((rev2-cogs2)/rev2)*100:null;
+  r.ebitdaMargin=ebitda2&&rev2?(ebitda2/rev2)*100:null;
+  r.netMargin=ni2&&rev2?(ni2/rev2)*100:null;
+  r.roa=ni2&&ta2?(ni2/ta2)*100:null;
+  r.roe=ni2&&eq2?(ni2/eq2)*100:null;
+  r.roce=ebitda2&&ta2&&cl2?(ebitda2/(ta2-cl2))*100:null;
+  const totalDebt=sd2+ld2;
+  r.debtToEquity=eq2?totalDebt/eq2:null;
+  r.debtToAssets=ta2?totalDebt/ta2:null;
+  r.interestCoverage=ebitda2&&int2&&int2>0?ebitda2/int2:null;
+  r.netDebt=totalDebt-(cash2||0);
+  r.netDebtToEbitda=ebitda2&&ebitda2>0?r.netDebt/ebitda2:null;
+  r.assetTurnover=rev2&&ta2?rev2/ta2:null;
+  r.receivablesDays=rec2&&rev2?(rec2/rev2)*365:null;
+  r.inventoryDays=inv2&&cogs2?(inv2/cogs2)*365:null;
+  r.payablesDays=pay2&&cogs2?(pay2/cogs2)*365:null;
+  r.cashConversionCycle=r.receivablesDays&&r.inventoryDays&&r.payablesDays?r.receivablesDays+r.inventoryDays-r.payablesDays:null;
+  r.revenueGrowth=rev1&&rev2?((rev2-rev1)/Math.abs(rev1))*100:null;
+  r.niGrowth=I.netincome[0]&&ni2?((ni2-I.netincome[0])/Math.abs(I.netincome[0]))*100:null;
+  r.assetGrowth=ta1&&ta2?((ta2-ta1)/Math.abs(ta1))*100:null;
+  r.equityGrowth=eq1&&eq2?((eq2-eq1)/Math.abs(eq1))*100:null;
+  r.dupont_margin=r.netMargin;r.dupont_turnover=r.assetTurnover;
+  r.dupont_leverage=ta2&&eq2?ta2/eq2:null;
+  r.dupont_roe=r.dupont_margin&&r.dupont_turnover&&r.dupont_leverage?(r.dupont_margin/100)*r.dupont_turnover*r.dupont_leverage*100:null;
+
+  const wacc=C.wacc/100,tg=C.termgrowth/100,yrs=C.projyears,fgr=C.fcfgrowth/100;
+  let dcfPV=0;
+  for(let i=1;i<=yrs;i++)dcfPV+=(fcf2*Math.pow(1+fgr,i))/Math.pow(1+wacc,i);
+  const terminalFCF=fcf2*Math.pow(1+fgr,yrs)*(1+tg);
+  const terminalValue=wacc>tg?terminalFCF/(wacc-tg):0;
+  r.enterpriseValue=dcfPV+terminalValue/Math.pow(1+wacc,yrs);
+  r.equityValue=r.enterpriseValue-r.netDebt;
+  r.dcfPerShare=shares&&r.equityValue?r.equityValue/shares:null;
+  r.dcfUpside=sp&&r.dcfPerShare?((r.dcfPerShare-sp)/sp)*100:null;
+  r.peRatio=mktcap&&ni2&&ni2>0?mktcap/ni2:null;
+  r.pbRatio=mktcap&&eq2?mktcap/eq2:null;
+  r.evEbitda=r.enterpriseValue&&ebitda2&&ebitda2>0?r.enterpriseValue/ebitda2:null;
+  r.pfcf=mktcap&&fcf2&&fcf2>0?mktcap/fcf2:null;
+  r.fcfMargin=fcf2&&rev2?(fcf2/rev2)*100:null;
+  r.cfoCoverage=cfo2&&cl2?cfo2/cl2:null;
+
+  const scores={};
+  let liqScore=50;
+  if(r.currentRatio!==null)liqScore=r.currentRatio>=2?100:r.currentRatio>=1.5?80:r.currentRatio>=1.2?65:r.currentRatio>=1?45:20;
+  if(r.quickRatio!==null){const qs=r.quickRatio>=1?100:r.quickRatio>=0.7?70:30;liqScore=(liqScore+qs)/2;}
+  scores.liquidity={score:Math.round(liqScore),weight:15,label:'Likidite'};
+
+  let profScore=50;const profParts=[];
+  if(r.netMargin!==null)profParts.push(r.netMargin>15?100:r.netMargin>8?75:r.netMargin>3?50:r.netMargin>0?30:5);
+  if(r.roe!==null)profParts.push(r.roe>20?100:r.roe>12?75:r.roe>5?50:r.roe>0?25:5);
+  if(r.roa!==null)profParts.push(r.roa>10?100:r.roa>5?75:r.roa>2?50:r.roa>0?25:5);
+  if(r.ebitdaMargin!==null)profParts.push(r.ebitdaMargin>25?100:r.ebitdaMargin>15?75:r.ebitdaMargin>8?50:25);
+  if(profParts.length)profScore=profParts.reduce((a,b)=>a+b,0)/profParts.length;
+  scores.profitability={score:Math.round(profScore),weight:25,label:'Karlilik'};
+
+  let levScore=50;const levParts=[];
+  if(r.debtToEquity!==null)levParts.push(r.debtToEquity<0.5?100:r.debtToEquity<1?80:r.debtToEquity<2?55:r.debtToEquity<3?30:10);
+  if(r.interestCoverage!==null)levParts.push(r.interestCoverage>5?100:r.interestCoverage>3?75:r.interestCoverage>1.5?45:15);
+  if(r.netDebtToEbitda!==null)levParts.push(r.netDebtToEbitda<1?100:r.netDebtToEbitda<2?75:r.netDebtToEbitda<3.5?45:15);
+  if(levParts.length)levScore=levParts.reduce((a,b)=>a+b,0)/levParts.length;
+  scores.leverage={score:Math.round(levScore),weight:20,label:'Kaldirac Riski'};
+
+  let growScore=50;const growParts=[];
+  if(r.revenueGrowth!==null)growParts.push(r.revenueGrowth>30?100:r.revenueGrowth>15?80:r.revenueGrowth>5?60:r.revenueGrowth>0?40:15);
+  if(r.niGrowth!==null)growParts.push(r.niGrowth>30?100:r.niGrowth>15?80:r.niGrowth>0?55:20);
+  if(r.equityGrowth!==null)growParts.push(r.equityGrowth>20?90:r.equityGrowth>10?70:r.equityGrowth>0?50:20);
+  if(growParts.length)growScore=growParts.reduce((a,b)=>a+b,0)/growParts.length;
+  scores.growth={score:Math.round(growScore),weight:20,label:'Buyume'};
+
+  let cfScore=50;const cfParts=[];
+  if(r.fcfMargin!==null)cfParts.push(r.fcfMargin>15?100:r.fcfMargin>8?75:r.fcfMargin>3?50:r.fcfMargin>0?30:10);
+  if(r.cfoCoverage!==null)cfParts.push(r.cfoCoverage>0.5?100:r.cfoCoverage>0.2?65:r.cfoCoverage>0?35:10);
+  if(cfParts.length)cfScore=cfParts.reduce((a,b)=>a+b,0)/cfParts.length;
+  if(r.dcfUpside!==null)cfScore=Math.min(100,cfScore+(r.dcfUpside>50?20:r.dcfUpside>25?12:r.dcfUpside>0?5:-10));
+  scores.cashflow={score:Math.round(cfScore),weight:20,label:'Nakit Akis ve DCF'};
+
+  const totalWeight=Object.values(scores).reduce((a,s)=>a+s.weight,0);
+  const CS=Math.round(Math.min(100,Math.max(0,Object.values(scores).reduce((a,s)=>a+s.score*s.weight,0)/totalWeight)));
+
+  let verdict,vClass,vDesc;
+  if(CS>=70){verdict='🟢 Yatirim Yapilabilir';vClass='verdict-buy';vDesc='Finansal gostergeler genel olarak guclu. Guven skoru yuksek, ancak bu bir kesinlik degil — makro riskler ve kisisel risk toleransin dikkate alinmalidir.';}
+  else if(CS>=45){verdict='🟡 Dikkatli Degerlendirin';vClass='verdict-hold';vDesc='Karisik sinyaller mevcut. Bazi guclu yonler var ancak riskler de goz carpiyor. Daha fazla arastirma onerilir.';}
+  else{verdict='🔴 Yuksek Risk';vClass='verdict-sell';vDesc='Finansal gostergeler ciddi zayifliklar iceriyor. Mevcut kosullarda guven skoru dusuk.';}
+
+  const risks=[];
+  const add=(type,icon,title,desc)=>risks.push({type,icon,title,desc});
+  if(r.currentRatio!==null){if(r.currentRatio>=1.5)add('positive','✅','Guclu Likidite',`Cari oran ${r.currentRatio.toFixed(2)}x`);else if(r.currentRatio<1)add('negative','❌','Likidite Riski',`Cari oran ${r.currentRatio.toFixed(2)}x — kisa vadeli borclar donen varliklardan fazla.`);}
+  if(r.netMargin!==null){if(r.netMargin>10)add('positive','✅','Saglikli Kar Marji',`Net kar marji ${r.netMargin.toFixed(1)}%`);else if(r.netMargin<2)add('warning','⚠️','Zayif Kar Marji',`Net kar marji ${r.netMargin.toFixed(1)}% — maliyet baskisina isaret ediyor.`);}
+  if(r.debtToEquity!==null){if(r.debtToEquity>2)add('negative','❌','Yuksek Borcululuk',`Borc/Ozkaynak ${r.debtToEquity.toFixed(2)}x`);else if(r.debtToEquity<0.5)add('positive','✅','Dusuk Borcululuk',`Borc/Ozkaynak ${r.debtToEquity.toFixed(2)}x`);}
+  if(r.revenueGrowth!==null){if(r.revenueGrowth>20)add('positive','✅','Guclu Buyume',`Satis geliri yillik %${r.revenueGrowth.toFixed(1)} buyudu.`);else if(r.revenueGrowth<0)add('negative','❌','Gelir Daralması',`Satis geliri %${Math.abs(r.revenueGrowth).toFixed(1)} geriledi.`);}
+  if(r.interestCoverage!==null){if(r.interestCoverage<2)add('negative','❌','Faiz Karsilama Riski',`FAVOK faiz giderini yalnizca ${r.interestCoverage.toFixed(1)}x karsilayor.`);else if(r.interestCoverage>5)add('positive','✅','Guclu Faiz Karsilama',`FAVOK faiz giderini ${r.interestCoverage.toFixed(1)}x karsilayor.`);}
+  if(r.dcfUpside!==null){if(r.dcfUpside>30)add('positive','✅','DCF Deger Firsati',`DCF modeli %${r.dcfUpside.toFixed(0)} potansiyel artis oneriyor (${r.dcfPerShare?r.dcfPerShare.toFixed(2):'—'} TL/hisse).`);else if(r.dcfUpside<-20)add('warning','⚠️','DCF Asiri Degerleme',`DCF gore hisse %${Math.abs(r.dcfUpside).toFixed(0)} pahali gorunuyor.`);}
+  if(r.fcfMargin!==null&&r.fcfMargin<0)add('negative','❌','Negatif Serbest Nakit Akisi',`FCF marji ${r.fcfMargin.toFixed(1)}%`);
+  if(r.roe!==null&&r.roe>18)add('positive','✅','Yuksek Ozkaynak Getirisi',`ROE %${r.roe.toFixed(1)}`);
+
+  const company=I.company||'Sirket';
+  document.getElementById('analysis-title').textContent=company+' — Analiz Raporu';
+  document.getElementById('analysis-subtitle').textContent=(I.year2||'')+' yili verileri';
+  const scoreColor=CS>=70?'#10B981':CS>=45?'#F59E0B':'#EF4444';
+  const circumference=2*Math.PI*54;
+  const dashOffset=circumference*(1-CS/100);
+
+  document.getElementById('analysis-content').innerHTML=`
+  <div class="score-hero">
+    <div class="score-label">GENEL GUVEN SKORU</div>
+    <div class="score-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle class="score-ring-bg" cx="70" cy="70" r="54"/>
+        <circle class="score-ring-fill" cx="70" cy="70" r="54" stroke="${scoreColor}"
+          stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" id="scoreRingFill"/>
+      </svg>
+      <div class="score-number" style="color:${scoreColor}">${CS}<div class="score-sub">/100</div></div>
+    </div>
+    <div class="verdict-badge ${vClass}">${verdict}</div>
+    <p class="verdict-desc">${vDesc}</p>
+  </div>
+  <div class="score-breakdown">
+    ${Object.values(scores).map(s=>`<div class="score-item"><div class="score-item-label">${s.label}</div><div class="score-item-bar"><div class="score-item-fill" style="width:${s.score}%;background:${s.score>=70?'#10B981':s.score>=45?'#F59E0B':'#EF4444'}"></div></div><div class="score-item-val" style="color:${s.score>=70?'#10B981':s.score>=45?'#F59E0B':'#EF4444'}">${s.score}</div></div>`).join('')}
+  </div>
+  <div class="card"><div class="card-title"><div class="card-icon purple">💎</div>DCF Icsel Deger Analizi</div>
+    <div class="dcf-result">
+      <div class="dcf-card"><div class="dcf-card-label">Firma Degeri (EV)</div><div class="dcf-card-value" style="color:var(--accent-teal)">TL${fmt(r.enterpriseValue)}</div><div class="dcf-card-sub">Bin</div></div>
+      <div class="dcf-card"><div class="dcf-card-label">Ozkaynak Degeri</div><div class="dcf-card-value" style="color:var(--accent-primary)">TL${fmt(r.equityValue)}</div><div class="dcf-card-sub">Bin</div></div>
+      ${r.dcfPerShare?`<div class="dcf-card"><div class="dcf-card-label">DCF Hisse Degeri</div><div class="dcf-card-value" style="color:var(--accent-green)">TL${r.dcfPerShare.toFixed(2)}</div><div class="dcf-card-sub">Piyasa: TL${sp||'—'}</div></div>
+      <div class="dcf-card"><div class="dcf-card-label">Potansiyel Getiri</div><div class="dcf-card-value" style="color:${(r.dcfUpside||0)>0?'var(--accent-green)':'var(--accent-red)'}">${r.dcfUpside!==null?(r.dcfUpside>0?'+':'')+r.dcfUpside.toFixed(1)+'%':'—'}</div><div class="dcf-card-sub">WACC: %${C.wacc}</div></div>`:''}
+    </div>
+  </div>
+  <div class="card"><div class="card-title"><div class="card-icon blue">💧</div>Likidite Rasyolari</div><div class="ratio-grid">
+    ${RC('Cari Oran',ratio(r.currentRatio),'Hedef >1.5x',r.currentRatio,v=>v>=1.5?'good':v>=1?'warn':'bad')}
+    ${RC('Asit-Test',ratio(r.quickRatio),'Hedef >1.0x',r.quickRatio,v=>v>=1?'good':v>=0.7?'warn':'bad')}
+    ${RC('Nakit Orani',ratio(r.cashRatio),'Hedef >0.2x',r.cashRatio,v=>v>=0.5?'good':v>=0.2?'warn':'bad')}
+  </div></div>
+  <div class="card"><div class="card-title"><div class="card-icon green">📈</div>Karlilik Rasyolari</div><div class="ratio-grid">
+    ${RC('Brut Kar Marji',pct(r.grossMargin),'Hedef >30%',r.grossMargin,v=>v>=30?'good':v>=15?'warn':'bad')}
+    ${RC('FAVOK Marji',pct(r.ebitdaMargin),'Hedef >15%',r.ebitdaMargin,v=>v>=15?'good':v>=8?'warn':'bad')}
+    ${RC('Net Kar Marji',pct(r.netMargin),'Hedef >8%',r.netMargin,v=>v>=8?'good':v>=3?'warn':'bad')}
+    ${RC('ROE',pct(r.roe),'Hedef >15%',r.roe,v=>v>=15?'good':v>=8?'warn':'bad')}
+    ${RC('ROA',pct(r.roa),'Hedef >5%',r.roa,v=>v>=5?'good':v>=2?'warn':'bad')}
+    ${RC('ROCE',pct(r.roce),'Sermaye Getirisi',r.roce,v=>v>=12?'good':v>=6?'warn':'bad')}
+  </div></div>
+  <div class="card"><div class="card-title"><div class="card-icon teal">⚖️</div>Kaldirac ve Borc Rasyolari</div><div class="ratio-grid">
+    ${RC('Borc/Ozkaynak',ratio(r.debtToEquity),'Hedef <1.0x',r.debtToEquity,v=>v<0.5?'good':v<1.5?'warn':'bad')}
+    ${RC('Borc/Varlik',pct(r.debtToAssets?r.debtToAssets*100:null),'Hedef <%50',r.debtToAssets?r.debtToAssets*100:null,v=>v<35?'good':v<55?'warn':'bad')}
+    ${RC('Faiz Karsilama',ratio(r.interestCoverage),'Hedef >3x',r.interestCoverage,v=>v>=3?'good':v>=1.5?'warn':'bad')}
+    ${RC('Net Borc/FAVOK',ratio(r.netDebtToEbitda),'Hedef <2.5x',r.netDebtToEbitda,v=>v<1.5?'good':v<3?'warn':'bad')}
+  </div></div>
+  <div class="card"><div class="card-title"><div class="card-icon blue">🔄</div>Faaliyet ve Verimlilik</div><div class="ratio-grid">
+    ${RC('Varlik Devir Hizi',ratio(r.assetTurnover),'Hedef >0.5x',r.assetTurnover,v=>v>=1?'good':v>=0.5?'warn':'bad')}
+    ${RC('Alacak Devir (gun)',r.receivablesDays?r.receivablesDays.toFixed(0)+'g':'—','Hedef <60g',r.receivablesDays,v=>v<45?'good':v<90?'warn':'bad')}
+    ${RC('Stok Devir (gun)',r.inventoryDays?r.inventoryDays.toFixed(0)+'g':'—','Hedef <90g',r.inventoryDays,v=>v<60?'good':v<120?'warn':'bad')}
+    ${RC('Nakit Dongusu',r.cashConversionCycle?r.cashConversionCycle.toFixed(0)+'g':'—','Dusuk = iyi',r.cashConversionCycle,v=>v<30?'good':v<60?'warn':'bad')}
+  </div></div>
+  <div class="card"><div class="card-title"><div class="card-icon purple">🔬</div>DuPont Ayristirmasi (ROE)</div><div class="ratio-grid">
+    ${RC('Net Kar Marji',pct(r.dupont_margin),'Karlilik bileseni',r.dupont_margin,v=>v>=8?'good':v>=3?'warn':'bad')}
+    ${RC('Varlik Devir Hizi',ratio(r.dupont_turnover),'Verimlilik bileseni',r.dupont_turnover,v=>v>=1?'good':v>=0.5?'warn':'bad')}
+    ${RC('Finansal Kaldirac',ratio(r.dupont_leverage),'Borclanma etkisi',r.dupont_leverage,v=>v<2?'good':v<3?'warn':'bad')}
+    ${RC('ROE DuPont',pct(r.dupont_roe),'Dogrulama degeri',r.dupont_roe,v=>v>=15?'good':v>=8?'warn':'bad')}
+  </div></div>
+  ${(r.peRatio||r.pbRatio||r.evEbitda)?`<div class="card"><div class="card-title"><div class="card-icon green">🏷️</div>Degerleme Katsayilari</div><div class="ratio-grid">
+    ${r.peRatio?RC('F/K P/E',ratio(r.peRatio),'Sektor ile karsilastir',r.peRatio,v=>v<15?'good':v<25?'warn':'bad'):''}
+    ${r.pbRatio?RC('F/DD P/B',ratio(r.pbRatio),'Hedef 1-3x',r.pbRatio,v=>v<2?'good':v<4?'warn':'bad'):''}
+    ${r.evEbitda?RC('EV/FAVOK',ratio(r.evEbitda),'Hedef <10x',r.evEbitda,v=>v<7?'good':v<12?'warn':'bad'):''}
+  </div></div>`:''}
+  <div class="card"><div class="card-title"><div class="card-icon teal">📊</div>Trend Analizi Yillik Degisim</div><div class="ratio-grid">
+    ${RC('Gelir Buyumesi',pct(r.revenueGrowth),'D1 D2',r.revenueGrowth,v=>v>=15?'good':v>=0?'warn':'bad')}
+    ${RC('Net Kar Buyumesi',pct(r.niGrowth),'D1 D2',r.niGrowth,v=>v>=15?'good':v>=0?'warn':'bad')}
+    ${RC('Varlik Buyumesi',pct(r.assetGrowth),'D1 D2',r.assetGrowth,v=>v>=10?'good':v>=0?'warn':'bad')}
+    ${RC('Ozkaynak Buyumesi',pct(r.equityGrowth),'D1 D2',r.equityGrowth,v=>v>=10?'good':v>=0?'warn':'bad')}
+  </div></div>
+  ${risks.length?`<div class="card"><div class="card-title"><div class="card-icon blue">🚦</div>Risk ve Firsat Faktorleri</div><div class="risk-list">${risks.map(rk=>`<div class="risk-item ${rk.type}"><span class="risk-icon">${rk.icon}</span><div class="risk-text"><strong>${rk.title}</strong>${rk.desc}</div></div>`).join('')}</div></div>`:''}
+  <div class="info-box" style="margin-top:8px"><span class="info-box-icon">⚠️</span><span><strong>Yatirim uyarisi:</strong> Bu analiz yalnizca karar destek amaclidir. Kesinlik icermez. Profesyonel finans danismanina basvurulması onerilir.</span></div>
+  <div class="btn-group" style="margin-top:16px">
+    <button class="btn btn-secondary" onclick="showPage('income',document.getElementById('nav-income'))">← Verileri Duzenle</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ Yazdir / PDF</button>
+  </div>`;
+  setTimeout(()=>{const ring=document.getElementById('scoreRingFill');if(ring)ring.style.strokeDashoffset=dashOffset;},100);
+}
+
+function RC(name,val,bench,raw,colorFn){
+  const sigColors={good:'#10B981',warn:'#F59E0B',bad:'#EF4444',neu:'#475569'};
+  const sig=raw!==null&&colorFn?colorFn(raw):'neu';
+  return `<div class="ratio-card"><div class="ratio-name">${name}</div><div class="ratio-value" style="color:${sigColors[sig]}"><span class="ratio-signal sig-${sig}"></span>${val}</div><div class="ratio-bench">${bench}</div></div>`;
+}
+
+function loadSaved(){
+  const navMap={income:'nav-income',balance:'nav-balance',cashflow:'nav-cashflow'};
+  const fill=(section,data)=>{
+    const maps={
+      income:{company_name:'company',year1:'year1',year2:'year2',sector:'sector',revenue1:'revenue.0',revenue2:'revenue.1',cogs1:'cogs.0',cogs2:'cogs.1',opex1:'opex.0',opex2:'opex.1',ebitda1:'ebitda.0',ebitda2:'ebitda.1',interest1:'interest.0',interest2:'interest.1',ebt1:'ebt.0',ebt2:'ebt.1',netincome1:'netincome.0',netincome2:'netincome.1',da1:'da.0',da2:'da.1'},
+      balance:{cash1:'cash.0',cash2:'cash.1',receivables1:'receivables.0',receivables2:'receivables.1',inventory1:'inventory.0',inventory2:'inventory.1',currentassets1:'currentassets.0',currentassets2:'currentassets.1',ppe1:'ppe.0',ppe2:'ppe.1',totalassets1:'totalassets.0',totalassets2:'totalassets.1',shortdebt1:'shortdebt.0',shortdebt2:'shortdebt.1',payables1:'payables.0',payables2:'payables.1',currentliabilities1:'currentliabilities.0',currentliabilities2:'currentliabilities.1',longdebt1:'longdebt.0',longdebt2:'longdebt.1',totalliabilities1:'totalliabilities.0',totalliabilities2:'totalliabilities.1',equity1:'equity.0',equity2:'equity.1',shares2:'shares',stockprice:'stockprice'},
+      cashflow:{cfo1:'cfo.0',cfo2:'cfo.1',capex1:'capex.0',capex2:'capex.1',cfi1:'cfi.0',cfi2:'cfi.1',cff1:'cff.0',cff2:'cff.1',dividends2:'dividends',wacc:'wacc',termgrowth:'termgrowth',projyears:'projyears',fcfgrowth:'fcfgrowth'}
+    };
+    Object.entries(maps[section]).forEach(([fieldId,dataPath])=>{
+      const el=document.getElementById(fieldId);if(!el)return;
+      const parts=dataPath.split('.');let val=data;
+      parts.forEach(p=>{val=val&&(isNaN(p)?val[p]:val[parseInt(p)]);});
+      if(val!==null&&val!==undefined)el.value=val;
+    });
+  };
+  ['income','balance','cashflow'].forEach(k=>{
+    const saved=localStorage.getItem('iq_'+k);if(!saved)return;
+    const data=JSON.parse(saved);S[k]=data;markNavDone(navMap[k]);fill(k,data);
+  });
+  if(S.income&&S.balance&&S.cashflow){markNavDone('nav-analysis');runAnalysis();}
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+window.addEventListener('DOMContentLoaded',loadSaved);
+  function fetchYahoo(){
+  const sym=document.getElementById('company_name').value.trim().toUpperCase();
+  if(!sym){showToast('Lutfen sembol girin','⚠️');return;}
+  const ticker=sym.includes('.')?sym:sym+'.IS';
+  const status=document.getElementById('fetchStatus');
+  const btn=document.getElementById('fetchBtn');
+  btn.textContent='⏳ Yukleniyor...';btn.disabled=true;
+  status.textContent='Yahoo Finance den veri cekiliyor: '+ticker;
+  const modules='incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,summaryDetail,defaultKeyStatistics,financialData';
+  const url='https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+ticker+'?modules='+modules;
+  const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
+  fetch(proxy)
+    .then(r=>r.json())
+    .then(data=>{
+      const contents=JSON.parse(data.contents);
+      if(contents.quoteSummary&&contents.quoteSummary.error){
+        throw new Error(contents.quoteSummary.error.description||'Sembol bulunamadi');
+      }
+      const res=contents.quoteSummary.result[0];
+      fillFromYahoo(res,ticker);
+      btn.textContent='✅ Veri Yuklendi';
+      status.textContent=ticker+' verileri basariyla yuklendi. Eksik alanlar varsa manuel girin.';
+      showToast('Veriler yuklendi!','✅');
+    })
+    .catch(err=>{
+      btn.textContent='⬇️ Veri Cek';btn.disabled=false;
+      status.textContent='Hata: '+err.message+'. Sembol dogru mu? (or. THYAO, EREGL)';
+      showToast('Veri cekilemedi: '+err.message,'❌');
+    });
+}
+
+function fillFromYahoo(res,ticker){
+  const btn=document.getElementById('fetchBtn');
+  btn.textContent='⬇️ Veri Cek';btn.disabled=false;
+
+  // Yardimci: alani doldur
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==null&&val!==undefined&&val!==0)el.value=Math.round(val/1000);};
+  const setRaw=(id,val)=>{const el=document.getElementById(id);if(el&&val!==null&&val!==undefined)el.value=val;};
+
+  // Gelir Tablosu — son 2 donem
+  const inc=res.incomeStatementHistory&&res.incomeStatementHistory.incomeStatementHistory;
+  if(inc&&inc.length>=1){
+    const d2=inc[0]; // en son donem
+    const d1=inc[1]||{}; // bir onceki donem
+    set('revenue2',d2.totalRevenue&&d2.totalRevenue.raw);
+    set('revenue1',d1.totalRevenue&&d1.totalRevenue.raw);
+    set('cogs2',d2.costOfRevenue&&d2.costOfRevenue.raw);
+    set('cogs1',d1.costOfRevenue&&d1.costOfRevenue.raw);
+    set('opex2',d2.totalOperatingExpenses&&d2.totalOperatingExpenses.raw&&
+      d2.totalRevenue&&d2.costOfRevenue?
+      d2.totalOperatingExpenses.raw-d2.costOfRevenue.raw:null);
+    set('interest2',d2.interestExpense&&Math.abs(d2.interestExpense.raw));
+    set('interest1',d1.interestExpense&&Math.abs(d1.interestExpense.raw));
+    set('ebt2',d2.pretaxIncome&&d2.pretaxIncome.raw);
+    set('ebt1',d1.pretaxIncome&&d1.pretaxIncome.raw);
+    set('netincome2',d2.netIncome&&d2.netIncome.raw);
+    set('netincome1',d1.netIncome&&d1.netIncome.raw);
+
+    // Donem yillari
+    if(d2.endDate&&d2.endDate.fmt){
+      const y2=d2.endDate.fmt.split('-')[0];
+      setRaw('year2',y2);
+    }
+    if(d1.endDate&&d1.endDate.fmt){
+      const y1=d1.endDate.fmt.split('-')[0];
+      setRaw('year1',y1);
+    }
+  }
+
+  // Bilanco — son 2 donem
+  const bal=res.balanceSheetHistory&&res.balanceSheetHistory.balanceSheetStatements;
+  if(bal&&bal.length>=1){
+    const d2=bal[0];const d1=bal[1]||{};
+    const gR=(obj,key)=>obj[key]&&obj[key].raw;
+    set('cash2',gR(d2,'cash'));set('cash1',gR(d1,'cash'));
+    set('receivables2',gR(d2,'netReceivables'));set('receivables1',gR(d1,'netReceivables'));
+    set('inventory2',gR(d2,'inventory'));set('inventory1',gR(d1,'inventory'));
+    set('currentassets2',gR(d2,'totalCurrentAssets'));set('currentassets1',gR(d1,'totalCurrentAssets'));
+    set('ppe2',gR(d2,'propertyPlantEquipment'));set('ppe1',gR(d1,'propertyPlantEquipment'));
+    set('totalassets2',gR(d2,'totalAssets'));set('totalassets1',gR(d1,'totalAssets'));
+    set('shortdebt2',gR(d2,'shortTermDebt')||gR(d2,'shortLongTermDebt'));
+    set('shortdebt1',gR(d1,'shortTermDebt')||gR(d1,'shortLongTermDebt'));
+    set('payables2',gR(d2,'accountsPayable'));set('payables1',gR(d1,'accountsPayable'));
+    set('currentliabilities2',gR(d2,'totalCurrentLiabilities'));set('currentliabilities1',gR(d1,'totalCurrentLiabilities'));
+    set('longdebt2',gR(d2,'longTermDebt'));set('longdebt1',gR(d1,'longTermDebt'));
+    set('totalliabilities2',gR(d2,'totalLiab'));set('totalliabilities1',gR(d1,'totalLiab'));
+    set('equity2',gR(d2,'totalStockholderEquity'));set('equity1',gR(d1,'totalStockholderEquity'));
+  }
+
+  // Nakit Akisi — son 2 donem
+  const cf=res.cashflowStatementHistory&&res.cashflowStatementHistory.cashflowStatements;
+  if(cf&&cf.length>=1){
+    const d2=cf[0];const d1=cf[1]||{};
+    const gR=(obj,key)=>obj[key]&&obj[key].raw;
+    set('cfo2',gR(d2,'totalCashFromOperatingActivities'));
+    set('cfo1',gR(d1,'totalCashFromOperatingActivities'));
+    set('capex2',gR(d2,'capitalExpenditures'));
+    set('capex1',gR(d1,'capitalExpenditures'));
+    set('cfi2',gR(d2,'totalCashflowsFromInvestingActivities'));
+    set('cfi1',gR(d1,'totalCashflowsFromInvestingActivities'));
+    set('cff2',gR(d2,'totalCashFromFinancingActivities'));
+    set('cff1',gR(d1,'totalCashFromFinancingActivities'));
+    set('dividends2',gR(d2,'dividendsPaid')&&Math.abs(gR(d2,'dividendsPaid')));
+  }
+
+  // Ozet veriler — hisse fiyati, adet vb.
+  const sd=res.summaryDetail;
+  const ks=res.defaultKeyStatistics;
+  const fd=res.financialData;
+  if(sd&&sd.previousClose){
+    const el=document.getElementById('stockprice');
+    if(el)el.value=sd.previousClose.raw||sd.regularMarketPrice&&sd.regularMarketPrice.raw||'';
+  }
+  if(ks&&ks.sharesOutstanding){
+    const el=document.getElementById('shares2');
+    if(el)el.value=Math.round(ks.sharesOutstanding.raw/1000);
+  }
+  if(fd&&fd.ebitda){
+    const el2=document.getElementById('ebitda2');
+    if(el2&&!el2.value)el2.value=Math.round(fd.ebitda.raw/1000);
+  }
+
+  // Sirket adini guncelle (geri yazma)
+  const nameEl=document.getElementById('company_name');
+  if(nameEl&&!nameEl.value.includes('.'))nameEl.value=ticker.replace('.IS','');
+  }
+</script>
+</body>
+</html>

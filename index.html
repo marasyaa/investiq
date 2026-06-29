@@ -635,7 +635,7 @@ async function fetchYahoo(){
   btn.textContent='⏳ Yukleniyor...';btn.disabled=true;
   status.textContent='FMP den veri cekiliyor: '+ticker+'...';
   try{
-    const base='https://financialmodelingprep.com/stable';
+    const base='https://financialmodelingprep.com/api/v3';
     const [inc,bal,cf,quote,kstat]=await Promise.all([
       fetch(`${base}/income-statement?symbol=${ticker}&limit=2&apikey=${FMP_KEY}`).then(r=>r.json()),
       fetch(`${base}/balance-sheet-statement?symbol=${ticker}&limit=2&apikey=${FMP_KEY}`).then(r=>r.json()),

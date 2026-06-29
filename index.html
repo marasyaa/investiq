@@ -1,980 +1,549 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InvestIQ — Yatırım Karar Destek Sistemi</title>
-  <meta name="description" content="Finansal analiz yöntemlerini birleştiren akıllı yatırım karar destek sistemi" />
-  <meta name="theme-color" content="#0B1120" />
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
-
-  <!-- Apple PWA -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="InvestIQ" />
-  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-
-  <style>
-    /* ─── Design Tokens ─── */
-    :root {
-      --bg-base:      #0B1120;
-      --bg-surface:   #111827;
-      --bg-elevated:  #1A2236;
-      --bg-card:      #1E293B;
-
-      --accent-primary:  #3B82F6;   /* electric blue */
-      --accent-teal:     #06B6D4;   /* data teal */
-      --accent-amber:    #F59E0B;   /* caution amber */
-      --accent-green:    #10B981;   /* positive green */
-      --accent-red:      #EF4444;   /* risk red */
-
-      --text-primary:    #F1F5F9;
-      --text-secondary:  #94A3B8;
-      --text-muted:      #475569;
-      --text-accent:     #3B82F6;
-
-      --border:          #1E293B;
-      --border-active:   #3B82F6;
-
-      --font-display: 'Space Grotesk', sans-serif;
-      --font-mono:    'Space Mono', monospace;
-      --font-body:    'Inter', sans-serif;
-
-      --radius-sm: 6px;
-      --radius-md: 12px;
-      --radius-lg: 20px;
-
-      --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ─── Reset ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg-base);
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ─── App Shell ─── */
-    .app { display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* ─── Header ─── */
-    .header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(11, 17, 32, 0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 64px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .logo {
-      font-family: var(--font-display);
-      font-size: 20px; font-weight: 700;
-      letter-spacing: -0.5px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .logo-mark {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-teal));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: white;
-    }
-    .logo-text { color: var(--text-primary); }
-    .logo-sub { color: var(--accent-teal); }
-
-    .header-badge {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--accent-amber);
-      border: 1px solid var(--accent-amber);
-      padding: 2px 8px; border-radius: 20px;
-      letter-spacing: 1px;
-    }
-
-    /* ─── Navigation ─── */
-    .nav {
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      display: flex; gap: 0;
-      overflow-x: auto;
-    }
-    .nav::-webkit-scrollbar { display: none; }
-    .nav-btn {
-      padding: 14px 20px;
-      font-family: var(--font-display);
-      font-size: 13px; font-weight: 500;
-      color: var(--text-secondary);
-      background: none; border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .nav-btn:hover { color: var(--text-primary); }
-    .nav-btn.active {
-      color: var(--accent-primary);
-      border-bottom-color: var(--accent-primary);
-    }
-    .nav-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent-green);
-      display: none;
-    }
-    .nav-btn.has-data .nav-dot { display: block; }
-
-    /* ─── Main Content ─── */
-    .main { flex: 1; padding: 32px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
-
-    /* ─── Page Sections ─── */
-    .page { display: none; }
-    .page.active { display: block; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ─── Section Header ─── */
-    .section-header { margin-bottom: 28px; }
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 11px; font-weight: 700;
-      color: var(--accent-teal);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 26px; font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.5px;
-      line-height: 1.2;
-    }
-    .section-desc {
-      margin-top: 8px;
-      color: var(--text-secondary);
-      font-size: 14px;
-      max-width: 520px;
-    }
-
-    /* ─── Cards ─── */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-family: var(--font-display);
-      font-size: 15px; font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .card-icon {
-      width: 28px; height: 28px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-    }
-    .card-icon.blue  { background: rgba(59,130,246,0.15); }
-    .card-icon.teal  { background: rgba(6,182,212,0.15); }
-    .card-icon.green { background: rgba(16,185,129,0.15); }
-
-    /* ─── Form Elements ─── */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-label {
-      font-size: 12px; font-weight: 500;
-      color: var(--text-secondary);
-      letter-spacing: 0.3px;
-    }
-    .form-input {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 14px;
-      transition: var(--transition);
-      outline: none;
-      width: 100%;
-    }
-    .form-input:focus {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-    }
-    .form-input::placeholder { color: var(--text-muted); }
-    .form-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .form-divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-    .form-subtitle {
-      font-family: var(--font-display);
-      font-size: 13px; font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .form-subtitle::after {
-      content: '';
-      flex: 1; height: 1px;
-      background: var(--border);
-    }
-
-    /* ─── Buttons ─── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 20px;
-      border-radius: var(--radius-sm);
-      font-family: var(--font-display);
-      font-size: 14px; font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      border: none;
-    }
-    .btn-primary {
-      background: var(--accent-primary);
-      color: white;
-    }
-    .btn-primary:hover { background: #2563EB; transform: translateY(-1px); }
-    .btn-secondary {
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { color: var(--text-primary); border-color: var(--text-secondary); }
-    .btn-success {
-      background: linear-gradient(135deg, var(--accent-green), #059669);
-      color: white;
-    }
-    .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
-
-    .btn-group {
-      display: flex; gap: 12px;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
-
-    /* ─── Progress Indicator ─── */
-    .progress-bar {
-      display: flex; gap: 8px;
-      margin-bottom: 32px;
-      align-items: center;
-    }
-    .progress-step {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 12px; color: var(--text-muted);
-    }
-    .progress-step.done { color: var(--accent-green); }
-    .progress-step.active { color: var(--accent-primary); font-weight: 600; }
-    .step-circle {
-      width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700;
-      font-family: var(--font-mono);
-      flex-shrink: 0;
-    }
-    .progress-step.done .step-circle {
-      background: var(--accent-green); border-color: var(--accent-green); color: white;
-    }
-    .progress-step.active .step-circle {
-      background: var(--accent-primary); border-color: var(--accent-primary); color: white;
-    }
-    .progress-connector {
-      flex: 1; height: 1px; background: var(--border);
-      max-width: 40px;
-    }
-
-    /* ─── Info Box ─── */
-    .info-box {
-      background: rgba(59,130,246,0.08);
-      border: 1px solid rgba(59,130,246,0.2);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-      display: flex; gap: 10px;
-    }
-    .info-box-icon { flex-shrink: 0; font-size: 15px; }
-
-    /* ─── Toast ─── */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--accent-green);
-      border-radius: var(--radius-md);
-      padding: 14px 20px;
-      font-size: 14px; color: var(--text-primary);
-      display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 999;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-
-    /* ─── Welcome Screen ─── */
-    .welcome {
-      text-align: center;
-      padding: 60px 24px;
-    }
-    .welcome-icon {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-teal));
-      border-radius: 24px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      margin: 0 auto 28px;
-    }
-    .welcome-title {
-      font-family: var(--font-display);
-      font-size: 36px; font-weight: 700;
-      letter-spacing: -1px;
-      margin-bottom: 12px;
-    }
-    .welcome-title span { color: var(--accent-teal); }
-    .welcome-desc {
-      color: var(--text-secondary);
-      font-size: 16px; max-width: 480px;
-      margin: 0 auto 40px;
-      line-height: 1.7;
-    }
-    .welcome-features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px; max-width: 700px;
-      margin: 0 auto 40px;
-      text-align: left;
-    }
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 18px;
-    }
-    .feature-icon { font-size: 22px; margin-bottom: 10px; }
-    .feature-title {
-      font-family: var(--font-display);
-      font-size: 14px; font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .feature-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 600px) {
-      .main { padding: 20px 16px; }
-      .header { padding: 0 16px; }
-      .nav { padding: 0 12px; }
-      .nav-btn { padding: 12px 14px; font-size: 12px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .welcome-title { font-size: 28px; }
-      .btn-group { flex-direction: column; }
-      .btn { justify-content: center; }
-    }
-
-    /* ─── Install Banner ─── */
-    .install-banner {
-      display: none;
-      background: var(--bg-elevated);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 24px;
-      align-items: center; justify-content: space-between; gap: 12px;
-      font-size: 13px; color: var(--text-secondary);
-    }
-    .install-banner.show { display: flex; }
-    .install-banner strong { color: var(--text-primary); }
-  </style>
-</head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InvestIQ</title>
+<meta name="theme-color" content="#0B1120"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="InvestIQ"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg-base:#0B1120;--bg-surface:#111827;--bg-elevated:#1A2236;--bg-card:#1E293B;
+  --accent-primary:#3B82F6;--accent-teal:#06B6D4;--accent-amber:#F59E0B;
+  --accent-green:#10B981;--accent-red:#EF4444;--accent-purple:#8B5CF6;
+  --text-primary:#F1F5F9;--text-secondary:#94A3B8;--text-muted:#475569;
+  --border:#1E293B;--radius-sm:6px;--radius-md:12px;--radius-lg:20px;
+  --font-display:'Space Grotesk',sans-serif;--font-mono:'Space Mono',monospace;
+  --font-body:'Inter',sans-serif;--transition:200ms cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-base);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.header{position:sticky;top:0;z-index:100;background:rgba(11,17,32,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--font-display);font-size:19px;font-weight:700;display:flex;align-items:center;gap:9px;}
+.logo-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-teal));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;}
+.logo-sub{color:var(--accent-teal);}
+.header-badge{font-family:var(--font-mono);font-size:10px;color:var(--accent-amber);border:1px solid var(--accent-amber);padding:2px 7px;border-radius:20px;letter-spacing:1px;}
+.nav{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;overflow-x:auto;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{padding:13px 16px;font-family:var(--font-display);font-size:12px;font-weight:500;color:var(--text-secondary);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:var(--transition);white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.nav-btn:hover{color:var(--text-primary);}
+.nav-btn.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary);}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--accent-green);display:none;}
+.nav-btn.has-data .nav-dot{display:block;}
+.main{flex:1;padding:24px 18px;max-width:960px;margin:0 auto;width:100%;}
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.section-header{margin-bottom:24px;}
+.section-label{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--accent-teal);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.section-title{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2;}
+.section-desc{margin-top:6px;color:var(--text-secondary);font-size:13px;max-width:520px;}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;margin-bottom:16px;}
+.card-title{font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.card-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.card-icon.blue{background:rgba(59,130,246,.15);}
+.card-icon.teal{background:rgba(6,182,212,.15);}
+.card-icon.green{background:rgba(16,185,129,.15);}
+.card-icon.purple{background:rgba(139,92,246,.15);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-size:11px;font-weight:500;color:var(--text-secondary);letter-spacing:.3px;}
+.form-input{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;color:var(--text-primary);font-family:var(--font-mono);font-size:13px;transition:var(--transition);outline:none;width:100%;}
+.form-input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.form-input::placeholder{color:var(--text-muted);}
+.form-hint{font-size:10px;color:var(--text-muted);}
+.form-divider{border:none;border-top:1px solid var(--border);margin:18px 0;}
+.form-subtitle{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.form-subtitle::after{content:'';flex:1;height:1px;background:var(--border);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);border:none;}
+.btn-primary{background:var(--accent-primary);color:#fff;}
+.btn-primary:hover{background:#2563EB;transform:translateY(-1px);}
+.btn-secondary{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);}
+.btn-secondary:hover{color:var(--text-primary);}
+.btn-success{background:linear-gradient(135deg,var(--accent-green),#059669);color:#fff;}
+.btn-success:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(16,185,129,.3);}
+.btn-group{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.info-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-secondary);margin-bottom:20px;display:flex;gap:9px;}
+.info-box-icon{flex-shrink:0;font-size:14px;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg-elevated);border:1px solid var(--accent-green);border-radius:var(--radius-md);padding:12px 18px;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:9px;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:999;}
+.toast.show{transform:translateY(0);opacity:1;}
+.welcome{text-align:center;padding:48px 16px;}
+.welcome-icon{width:72px;height:72px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-teal));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 24px;}
+.welcome-title{font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:10px;}
+.welcome-title span{color:var(--accent-teal);}
+.welcome-desc{color:var(--text-secondary);font-size:15px;max-width:440px;margin:0 auto 32px;line-height:1.7;}
+.welcome-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;max-width:640px;margin:0 auto 32px;text-align:left;}
+.feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;}
+.feature-icon{font-size:20px;margin-bottom:8px;}
+.feature-title{font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:4px;}
+.feature-desc{font-size:11px;color:var(--text-secondary);line-height:1.5;}
+.score-hero{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;margin-bottom:20px;position:relative;overflow:hidden;}
+.score-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12),transparent 70%);pointer-events:none;}
+.score-label{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.score-ring{width:140px;height:140px;margin:0 auto 20px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:var(--bg-elevated);stroke-width:10;}
+.score-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);}
+.score-number{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-display);font-size:38px;font-weight:700;line-height:1;text-align:center;}
+.score-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.verdict-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:40px;font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:12px;}
+.verdict-buy{background:rgba(16,185,129,.15);color:var(--accent-green);border:2px solid var(--accent-green);}
+.verdict-hold{background:rgba(245,158,11,.15);color:var(--accent-amber);border:2px solid var(--accent-amber);}
+.verdict-sell{background:rgba(239,68,68,.15);color:var(--accent-red);border:2px solid var(--accent-red);}
+.verdict-desc{color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;}
+.score-breakdown{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+.score-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;}
+.score-item-label{font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-family:var(--font-display);font-weight:500;}
+.score-item-bar{height:4px;background:var(--bg-elevated);border-radius:2px;margin-bottom:6px;overflow:hidden;}
+.score-item-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.score-item-val{font-family:var(--font-mono);font-size:13px;font-weight:700;}
+.ratio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
+.ratio-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;}
+.ratio-name{font-size:11px;color:var(--text-secondary);margin-bottom:4px;}
+.ratio-value{font-family:var(--font-mono);font-size:18px;font-weight:700;margin-bottom:2px;}
+.ratio-bench{font-size:10px;color:var(--text-muted);}
+.ratio-signal{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
+.sig-good{background:var(--accent-green);}
+.sig-warn{background:var(--accent-amber);}
+.sig-bad{background:var(--accent-red);}
+.sig-neu{background:var(--text-muted);}
+.risk-list{display:flex;flex-direction:column;gap:10px;}
+.risk-item{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius-sm);border-left:3px solid;}
+.risk-item.positive{border-color:var(--accent-green);}
+.risk-item.warning{border-color:var(--accent-amber);}
+.risk-item.negative{border-color:var(--accent-red);}
+.risk-icon{font-size:16px;flex-shrink:0;}
+.risk-text{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+.risk-text strong{color:var(--text-primary);display:block;margin-bottom:2px;font-size:13px;}
+.dcf-result{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
+.dcf-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;text-align:center;}
+.dcf-card-label{font-size:11px;color:var(--text-secondary);margin-bottom:6px;}
+.dcf-card-value{font-family:var(--font-display);font-size:20px;font-weight:700;}
+.dcf-card-sub{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.progress-bar{display:flex;gap:6px;margin-bottom:24px;align-items:center;}
+.progress-step{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);}
+.progress-step.done{color:var(--accent-green);}
+.progress-step.active{color:var(--accent-primary);font-weight:600;}
+.step-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--font-mono);flex-shrink:0;}
+.progress-step.done .step-circle{background:var(--accent-green);border-color:var(--accent-green);color:#fff;}
+.progress-step.active .step-circle{background:var(--accent-primary);border-color:var(--accent-primary);color:#fff;}
+.progress-connector{flex:1;height:1px;background:var(--border);max-width:32px;}
+@media(max-width:600px){
+  .main{padding:18px 14px;}.header{padding:0 14px;}.nav{padding:0 10px;}
+  .form-grid{grid-template-columns:1fr;}.welcome-title{font-size:26px;}
+  .btn-group{flex-direction:column;}.btn{justify-content:center;}
+  .score-breakdown{grid-template-columns:1fr 1fr;}.ratio-grid{grid-template-columns:1fr 1fr;}
+}
+         </style>
+         </head>
 <body>
-
 <div class="app">
+<header class="header">
+  <div class="logo"><div class="logo-mark">IQ</div><span>Invest<span class="logo-sub">IQ</span></span></div>
+  <span class="header-badge">v2.0</span>
+</header>
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('welcome',this)">🏠 Ana Sayfa</button>
+  <button class="nav-btn" id="nav-income" onclick="showPage('income',this)">📊 Gelir <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-balance" onclick="showPage('balance',this)">🏦 Bilanco <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-cashflow" onclick="showPage('cashflow',this)">💸 Nakit <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-analysis" onclick="showPage('analysis',this)">🔬 Analiz <span class="nav-dot"></span></button>
+</nav>
+<main class="main">
 
-  <!-- Install Banner -->
-  <div class="install-banner" id="installBanner">
-    <span>📲 <strong>InvestIQ'yu</strong> cihazına yüklemek ister misin?</span>
-    <div style="display:flex;gap:8px;flex-shrink:0">
-      <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="dismissInstall()">Hayır</button>
-      <button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="installPWA()">Yükle</button>
+<section class="page active" id="page-welcome">
+  <div class="welcome">
+    <div class="welcome-icon">📈</div>
+    <h1 class="welcome-title">Invest<span>IQ</span></h1>
+    <p class="welcome-desc">8 finansal analiz yontemini birlestiren, kesinlik iddia etmeden yuksek guven skoruyla yatirim karari sunan akilli sistem.</p>
+    <div class="welcome-features">
+      <div class="feature-card"><div class="feature-icon">📐</div><div class="feature-title">20+ Rasyo</div><div class="feature-desc">Likidite, karlilik, faaliyet ve kaldirac oranlari</div></div>
+      <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Guven Skoru</div><div class="feature-desc">Agirlikli 0-100 puan sistemi</div></div>
+      <div class="feature-card"><div class="feature-icon">📉</div><div class="feature-title">DCF Modeli</div><div class="feature-desc">Icsel deger ve piyasa karsilastirmasi</div></div>
+      <div class="feature-card"><div class="feature-icon">🚦</div><div class="feature-title">Karar Raporu</div><div class="feature-desc">Al / Bekle / Sat onerisi ve gerekcesi</div></div>
+    </div>
+    <button class="btn btn-primary" style="font-size:14px;padding:12px 28px" onclick="showPage('income',document.getElementById('nav-income'))">Analize Basla →</button>
+  </div>
+</section>
+
+<section class="page" id="page-income">
+  <div class="section-header">
+    <div class="section-label">Adim 1 / 3</div>
+    <h2 class="section-title">Gelir Tablosu</h2>
+    <p class="section-desc">Son 2 yila ait gelir tablosu verilerini girin. Tum degerler TL Bin.</p>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step active"><div class="step-circle">1</div><span>Gelir</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">2</div><span>Bilanco</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">3</div><span>Nakit</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">4</div><span>Analiz</span></div>
+  </div>
+  <div class="info-box"><span class="info-box-icon">💡</span><span>Degerleri TL Bin olarak girin. Bos birakilan alanlar hesaplamanin disinda tutulur.</span></div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon blue">🏢</div>Sirket Bilgileri</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Sirket / Sembol</label><input class="form-input" id="company_name" placeholder="or. THYAO"/></div>
+      <div class="form-group"><label class="form-label">Donem 1 (Onceki)</label><input class="form-input" type="number" id="year1" placeholder="2022"/></div>
+      <div class="form-group"><label class="form-label">Donem 2 (Son)</label><input class="form-input" type="number" id="year2" placeholder="2023"/></div>
+      <div class="form-group"><label class="form-label">Sektor</label>
+        <select class="form-input" id="sector">
+          <option value="">Seciniz...</option>
+          <option value="manufacturing">Uretim / Sanayi</option>
+          <option value="retail">Perakende</option>
+          <option value="technology">Teknoloji</option>
+          <option value="finance">Finans</option>
+          <option value="energy">Enerji</option>
+          <option value="healthcare">Saglik</option>
+          <option value="construction">Insaat / GYO</option>
+          <option value="other">Diger</option>
+        </select>
+      </div>
     </div>
   </div>
-
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">
-      <div class="logo-mark">IQ</div>
-      <span class="logo-text">Invest<span class="logo-sub">IQ</span></span>
+  <div class="card">
+    <div class="card-title"><div class="card-icon blue">💰</div>Gelir ve Kar (TL Bin)</div>
+    <div class="form-subtitle">Satislar ve Maliyet</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Net Satislar D1</label><input class="form-input" type="number" id="revenue1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Satislar D2</label><input class="form-input" type="number" id="revenue2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Satis Maliyeti D1</label><input class="form-input" type="number" id="cogs1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Satis Maliyeti D2</label><input class="form-input" type="number" id="cogs2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Faaliyet Giderleri D1</label><input class="form-input" type="number" id="opex1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Faaliyet Giderleri D2</label><input class="form-input" type="number" id="opex2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">FAVOK / EBITDA D1</label><input class="form-input" type="number" id="ebitda1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">FAVOK / EBITDA D2</label><input class="form-input" type="number" id="ebitda2" placeholder="0"/></div>
     </div>
-    <span class="header-badge">BETA v1.0</span>
-  </header>
+    <hr class="form-divider"/>
+    <div class="form-subtitle">Net Kar</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Finansman Gideri D1</label><input class="form-input" type="number" id="interest1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman Gideri D2</label><input class="form-input" type="number" id="interest2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D1</label><input class="form-input" type="number" id="ebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D2</label><input class="form-input" type="number" id="ebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Kar D1</label><input class="form-input" type="number" id="netincome1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Kar D2</label><input class="form-input" type="number" id="netincome2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Amortisman D1</label><input class="form-input" type="number" id="da1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Amortisman D2</label><input class="form-input" type="number" id="da2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="saveIncome()">Kaydet ve Devam →</button>
+    <button class="btn btn-secondary" onclick="clearSection('income')">Temizle</button>
+  </div>
+</section>
 
-  <!-- Navigation -->
-  <nav class="nav">
-    <button class="nav-btn active" onclick="showPage('welcome', this)">
-      🏠 Ana Sayfa
-    </button>
-    <button class="nav-btn" id="nav-income" onclick="showPage('income', this)">
-      📊 Gelir Tablosu
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-btn" id="nav-balance" onclick="showPage('balance', this)">
-      🏦 Bilanço
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-btn" id="nav-cashflow" onclick="showPage('cashflow', this)">
-      💸 Nakit Akışı
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-btn" id="nav-analysis" onclick="showPage('analysis', this)">
-      🔬 Analiz
-      <span class="nav-dot"></span>
-    </button>
-  </nav>
+<section class="page" id="page-balance">
+  <div class="section-header">
+    <div class="section-label">Adim 2 / 3</div>
+    <h2 class="section-title">Bilanco</h2>
+    <p class="section-desc">Varlik, borc ve ozkaynak verileri. TL Bin cinsinden.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon teal">🏗️</div>Donen Varliklar (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Nakit D1</label><input class="form-input" type="number" id="cash1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Nakit D2</label><input class="form-input" type="number" id="cash2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Alacaklar D1</label><input class="form-input" type="number" id="receivables1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Alacaklar D2</label><input class="form-input" type="number" id="receivables2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Stoklar D1</label><input class="form-input" type="number" id="inventory1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Stoklar D2</label><input class="form-input" type="number" id="inventory2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Donen Varlik D1</label><input class="form-input" type="number" id="currentassets1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Donen Varlik D2</label><input class="form-input" type="number" id="currentassets2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Maddi Duran Varlik D1</label><input class="form-input" type="number" id="ppe1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Maddi Duran Varlik D2</label><input class="form-input" type="number" id="ppe2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Varlik D1</label><input class="form-input" type="number" id="totalassets1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Varlik D2</label><input class="form-input" type="number" id="totalassets2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon teal">📋</div>Borclar ve Ozkaynaklar (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="shortdebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="shortdebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Borclar D1</label><input class="form-input" type="number" id="payables1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Borclar D2</label><input class="form-input" type="number" id="payables2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D1</label><input class="form-input" type="number" id="currentliabilities1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D2</label><input class="form-input" type="number" id="currentliabilities2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="longdebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="longdebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Borc D1</label><input class="form-input" type="number" id="totalliabilities1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Borc D2</label><input class="form-input" type="number" id="totalliabilities2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ozkaynaklar D1</label><input class="form-input" type="number" id="equity1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ozkaynaklar D2</label><input class="form-input" type="number" id="equity2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Hisse Sayisi (Bin adet)</label><input class="form-input" type="number" id="shares2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Guncel Hisse Fiyati (TL)</label><input class="form-input" type="number" id="stockprice" placeholder="42.50"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="showPage('income',document.getElementById('nav-income'))">← Geri</button>
+    <button class="btn btn-primary" onclick="saveBalance()">Kaydet ve Devam →</button>
+  </div>
+</section>
 
-  <!-- Main -->
-  <main class="main">
+<section class="page" id="page-cashflow">
+  <div class="section-header">
+    <div class="section-label">Adim 3 / 3</div>
+    <h2 class="section-title">Nakit Akis Tablosu</h2>
+    <p class="section-desc">Nakit akislari ve DCF model parametreleri. TL Bin cinsinden.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon green">🔄</div>Nakit Akislari (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Isletme NCF D1</label><input class="form-input" type="number" id="cfo1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Isletme NCF D2</label><input class="form-input" type="number" id="cfo2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">CapEx D1</label><input class="form-input" type="number" id="capex1" placeholder="negatif girin"/></div>
+      <div class="form-group"><label class="form-label">CapEx D2</label><input class="form-input" type="number" id="capex2" placeholder="negatif girin"/></div>
+      <div class="form-group"><label class="form-label">Yatirim NCF D1</label><input class="form-input" type="number" id="cfi1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Yatirim NCF D2</label><input class="form-input" type="number" id="cfi2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman NCF D1</label><input class="form-input" type="number" id="cff1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman NCF D2</label><input class="form-input" type="number" id="cff2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Odenen Temettu D2</label><input class="form-input" type="number" id="dividends2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon purple">⚙️</div>DCF Model Parametreleri</div>
+    <div class="info-box" style="margin-bottom:14px"><span class="info-box-icon">📌</span><span>Turkiye piyasasi icin tipik degerler: WACC %15-25, Terminal buyume %3-6</span></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Iskonto Orani / WACC (%)</label><input class="form-input" type="number" id="wacc" placeholder="18"/></div>
+      <div class="form-group"><label class="form-label">Terminal Buyume Orani (%)</label><input class="form-input" type="number" id="termgrowth" placeholder="5"/></div>
+      <div class="form-group"><label class="form-label">Projeksiyon Yili</label><input class="form-input" type="number" id="projyears" placeholder="5" min="3" max="10"/></div>
+      <div class="form-group"><label class="form-label">Yillik FCF Buyume Tahmini (%)</label><input class="form-input" type="number" id="fcfgrowth" placeholder="12"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="showPage('balance',document.getElementById('nav-balance'))">← Geri</button>
+    <button class="btn btn-success" onclick="saveCashflowAndAnalyze()">✓ Analizi Calistir</button>
+  </div>
+</section>
 
-    <!-- ─── Welcome Page ─── -->
-    <section class="page active" id="page-welcome">
-      <div class="welcome">
-        <div class="welcome-icon">📈</div>
-        <h1 class="welcome-title">Invest<span>IQ</span></h1>
-        <p class="welcome-desc">
-          8 finansal analiz yöntemini birleştirerek şirketi değerlendiren, kesinlik iddia etmeden yüksek güven skoruyla yatırım kararı sunan akıllı sistem.
-        </p>
+<section class="page" id="page-analysis">
+  <div class="section-header">
+    <div class="section-label">Sonuc Raporu</div>
+    <h2 class="section-title" id="analysis-title">Finansal Analiz</h2>
+    <p class="section-desc" id="analysis-subtitle">Veri girisini tamamlayarak analizi baslatin.</p>
+  </div>
+  <div id="analysis-content">
+    <div class="card" style="text-align:center;padding:40px">
+      <div style="font-size:44px;margin-bottom:14px">🔬</div>
+      <div style="font-family:var(--font-display);font-size:17px;font-weight:600;margin-bottom:8px">Henuz Veri Girilmedi</div>
+      <div style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">3 adimi tamamlayip Analizi Calistir butonuna basin.</div>
+      <button class="btn btn-primary" onclick="showPage('income',document.getElementById('nav-income'))">Veri Girisine Git →</button>
+    </div>
+  </div>
+</section>
 
-        <div class="welcome-features">
-          <div class="feature-card">
-            <div class="feature-icon">📐</div>
-            <div class="feature-title">20+ Finansal Rasyo</div>
-            <div class="feature-desc">Likidite, kârlılık, faaliyet ve kaldıraç oranları otomatik hesaplanır</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <div class="feature-title">Güven Skoru</div>
-            <div class="feature-desc">Her analiz kendi ağırlığıyla birleşir, 0–100 arası güven puanı üretilir</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">📉</div>
-            <div class="feature-title">DCF Modeli</div>
-            <div class="feature-desc">İndirgenmiş nakit akışıyla içsel değer hesaplanır</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🔴🟡🟢</div>
-            <div class="feature-title">Karar Raporu</div>
-            <div class="feature-desc">Trafik ışığı sistemiyle net yatırım tavsiyesi ve risk analizi</div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary" style="font-size:15px;padding:14px 32px" onclick="showPage('income', document.querySelector('.nav-btn:nth-child(2)'))">
-          Analize Başla →
-        </button>
-      </div>
-    </section>
-
-    <!-- ─── Income Statement Page ─── -->
-    <section class="page" id="page-income">
-      <div class="section-header">
-        <div class="section-label">Adım 1 / 3</div>
-        <h2 class="section-title">Gelir Tablosu</h2>
-        <p class="section-desc">Şirketin son 2 yılına ait gelir tablosu verilerini girin. Yüzde analizi ve trend hesaplamaları için 2 dönem gereklidir.</p>
-      </div>
-
-      <div class="progress-bar">
-        <div class="progress-step active" id="ps-1">
-          <div class="step-circle">1</div>
-          <span>Gelir Tablosu</span>
-        </div>
-        <div class="progress-connector"></div>
-        <div class="progress-step" id="ps-2">
-          <div class="step-circle">2</div>
-          <span>Bilanço</span>
-        </div>
-        <div class="progress-connector"></div>
-        <div class="progress-step" id="ps-3">
-          <div class="step-circle">3</div>
-          <span>Nakit Akışı</span>
-        </div>
-        <div class="progress-connector"></div>
-        <div class="progress-step" id="ps-4">
-          <div class="step-circle">4</div>
-          <span>Analiz</span>
-        </div>
-      </div>
-
-      <div class="info-box">
-        <span class="info-box-icon">💡</span>
-        <span>Tüm değerleri <strong>Türk Lirası (₺ Bin)</strong> olarak girin. Negatif değerler için eksi işareti kullanın. Bilmediğiniz alanları boş bırakabilirsiniz.</span>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <div class="card-icon blue">📊</div>
-          Dönem Bilgileri
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Şirket Adı / Sembol</label>
-            <input class="form-input" type="text" id="company_name" placeholder="ör. THYAO" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Dönem 1 (Önceki Yıl)</label>
-            <input class="form-input" type="number" id="year1" placeholder="ör. 2022" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Dönem 2 (Son Yıl)</label>
-            <input class="form-input" type="number" id="year2" placeholder="ör. 2023" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Sektör</label>
-            <select class="form-input" id="sector">
-              <option value="">Seçiniz...</option>
-              <option value="manufacturing">Üretim / Sanayi</option>
-              <option value="retail">Perakende / Ticaret</option>
-              <option value="technology">Teknoloji</option>
-              <option value="finance">Finans / Bankacılık</option>
-              <option value="energy">Enerji</option>
-              <option value="healthcare">Sağlık</option>
-              <option value="construction">İnşaat / GYO</option>
-              <option value="other">Diğer</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <div class="card-icon blue">💰</div>
-          Gelir & Maliyet (₺ Bin)
-        </div>
-
-        <div class="form-subtitle">Gelirler</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Net Satışlar — Dönem 1</label>
-            <input class="form-input" type="number" id="revenue1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Net Satışlar — Dönem 2</label>
-            <input class="form-input" type="number" id="revenue2" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Satışların Maliyeti — D1</label>
-            <input class="form-input" type="number" id="cogs1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Satışların Maliyeti — D2</label>
-            <input class="form-input" type="number" id="cogs2" placeholder="0" />
-          </div>
-        </div>
-
-        <hr class="form-divider" />
-        <div class="form-subtitle">Faaliyet Kârı</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Faaliyet Giderleri — D1</label>
-            <input class="form-input" type="number" id="opex1" placeholder="0" />
-            <span class="form-hint">Pazarlama, yönetim, Ar-Ge giderleri toplamı</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Faaliyet Giderleri — D2</label>
-            <input class="form-input" type="number" id="opex2" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">FAVÖK (EBITDA) — D1</label>
-            <input class="form-input" type="number" id="ebitda1" placeholder="0" />
-            <span class="form-hint">Boş bırakırsanız hesaplanır</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">FAVÖK (EBITDA) — D2</label>
-            <input class="form-input" type="number" id="ebitda2" placeholder="0" />
-          </div>
-        </div>
-
-        <hr class="form-divider" />
-        <div class="form-subtitle">Net Kâr</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Finansman Giderleri (Faiz) — D1</label>
-            <input class="form-input" type="number" id="interest1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Finansman Giderleri (Faiz) — D2</label>
-            <input class="form-input" type="number" id="interest2" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Vergi Öncesi Kâr — D1</label>
-            <input class="form-input" type="number" id="ebt1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Vergi Öncesi Kâr — D2</label>
-            <input class="form-input" type="number" id="ebt2" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Net Kâr — D1</label>
-            <input class="form-input" type="number" id="netincome1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Net Kâr — D2</label>
-            <input class="form-input" type="number" id="netincome2" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Amortisman & İtfa — D1</label>
-            <input class="form-input" type="number" id="da1" placeholder="0" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Amortisman & İtfa — D2</label>
-            <input class="form-input" type="number" id="da2" placeholder="0" />
-          </div>
-        </div>
-      </div>
-
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="saveIncome()">Kaydet ve Devam Et →</button>
-        <button class="btn btn-secondary" onclick="clearSection('income')">Temizle</button>
-      </div>
-    </section>
-
-    <!-- ─── Balance Sheet Page ─── -->
-    <section class="page" id="page-balance">
-      <div class="section-header">
-        <div class="section-label">Adım 2 / 3</div>
-        <h2 class="section-title">Bilanço</h2>
-        <p class="section-desc">Varlıklar, borçlar ve özkaynak verilerini girin. Likidite ve kaldıraç rasyoları bu verilerle hesaplanır.</p>
-      </div>
-
-      <div class="info-box">
-        <span class="info-box-icon">⚖️</span>
-        <span><strong>Kontrol:</strong> Toplam Varlık = Toplam Borç + Özkaynaklar olmalıdır. Sistem otomatik kontrol eder.</span>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><div class="card-icon teal">🏗️</div>Dönen Varlıklar (₺ Bin)</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Nakit & Nakde Eşdeğer — D1</label><input class="form-input" type="number" id="cash1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Nakit & Nakde Eşdeğer — D2</label><input class="form-input" type="number" id="cash2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Kısa Vadeli Yatırımlar — D1</label><input class="form-input" type="number" id="shortinv1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Kısa Vadeli Yatırımlar — D2</label><input class="form-input" type="number" id="shortinv2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ticari Alacaklar — D1</label><input class="form-input" type="number" id="receivables1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ticari Alacaklar — D2</label><input class="form-input" type="number" id="receivables2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Stoklar — D1</label><input class="form-input" type="number" id="inventory1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Stoklar — D2</label><input class="form-input" type="number" id="inventory2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Dönen Varlık — D1</label><input class="form-input" type="number" id="currentassets1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Dönen Varlık — D2</label><input class="form-input" type="number" id="currentassets2" placeholder="0" /></div>
-        </div>
-
-        <hr class="form-divider" />
-        <div class="form-subtitle">Duran Varlıklar</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Maddi Duran Varlık (net) — D1</label><input class="form-input" type="number" id="ppe1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Maddi Duran Varlık (net) — D2</label><input class="form-input" type="number" id="ppe2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Varlık — D1</label><input class="form-input" type="number" id="totalassets1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Varlık — D2</label><input class="form-input" type="number" id="totalassets2" placeholder="0" /></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><div class="card-icon teal">📋</div>Borçlar & Özkaynaklar (₺ Bin)</div>
-        <div class="form-subtitle">Kısa Vadeli Borçlar</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Kısa Vadeli Finansal Borç — D1</label><input class="form-input" type="number" id="shortdebt1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Kısa Vadeli Finansal Borç — D2</label><input class="form-input" type="number" id="shortdebt2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ticari Borçlar — D1</label><input class="form-input" type="number" id="payables1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ticari Borçlar — D2</label><input class="form-input" type="number" id="payables2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Kısa Vadeli Borç — D1</label><input class="form-input" type="number" id="currentliabilities1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Kısa Vadeli Borç — D2</label><input class="form-input" type="number" id="currentliabilities2" placeholder="0" /></div>
-        </div>
-
-        <hr class="form-divider" />
-        <div class="form-subtitle">Uzun Vadeli Borçlar & Özkaynaklar</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borç — D1</label><input class="form-input" type="number" id="longdebt1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borç — D2</label><input class="form-input" type="number" id="longdebt2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Borç — D1</label><input class="form-input" type="number" id="totalliabilities1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Toplam Borç — D2</label><input class="form-input" type="number" id="totalliabilities2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ana Ortaklığa Ait Özkaynak — D1</label><input class="form-input" type="number" id="equity1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ana Ortaklığa Ait Özkaynak — D2</label><input class="form-input" type="number" id="equity2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Hisse Sayısı (adet, Bin) — D2</label><input class="form-input" type="number" id="shares2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Piyasa Fiyatı (₺) — Güncel</label><input class="form-input" type="number" id="stockprice" placeholder="ör. 42.50" /></div>
-        </div>
-      </div>
-
-      <div class="btn-group">
-        <button class="btn btn-secondary" onclick="showPage('income', document.getElementById('nav-income'))">← Geri</button>
-        <button class="btn btn-primary" onclick="saveBalance()">Kaydet ve Devam Et →</button>
-      </div>
-    </section>
-
-    <!-- ─── Cash Flow Page ─── -->
-    <section class="page" id="page-cashflow">
-      <div class="section-header">
-        <div class="section-label">Adım 3 / 3</div>
-        <h2 class="section-title">Nakit Akış Tablosu</h2>
-        <p class="section-desc">İşletme, yatırım ve finansman faaliyetlerinden nakit akışlarını girin. DCF ve serbest nakit akışı hesaplamaları için kullanılır.</p>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><div class="card-icon green">🔄</div>İşletme Faaliyetleri (₺ Bin)</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">İşletme Faaliyetlerinden NCF — D1</label><input class="form-input" type="number" id="cfo1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">İşletme Faaliyetlerinden NCF — D2</label><input class="form-input" type="number" id="cfo2" placeholder="0" /></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><div class="card-icon green">🏭</div>Yatırım Faaliyetleri (₺ Bin)</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Sermaye Harcamaları (CapEx) — D1</label><input class="form-input" type="number" id="capex1" placeholder="0 (negatif girin)" /></div>
-          <div class="form-group"><label class="form-label">Sermaye Harcamaları (CapEx) — D2</label><input class="form-input" type="number" id="capex2" placeholder="0 (negatif girin)" /></div>
-          <div class="form-group"><label class="form-label">Yatırım Faaliyetlerinden NCF — D1</label><input class="form-input" type="number" id="cfi1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Yatırım Faaliyetlerinden NCF — D2</label><input class="form-input" type="number" id="cfi2" placeholder="0" /></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><div class="card-icon green">💳</div>Finansman Faaliyetleri & DCF Parametreleri</div>
-        <div class="form-subtitle">Finansman</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Finansman Faaliyetlerinden NCF — D1</label><input class="form-input" type="number" id="cff1" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Finansman Faaliyetlerinden NCF — D2</label><input class="form-input" type="number" id="cff2" placeholder="0" /></div>
-          <div class="form-group"><label class="form-label">Ödenen Temettü — D2</label><input class="form-input" type="number" id="dividends2" placeholder="0" /></div>
-        </div>
-
-        <hr class="form-divider" />
-        <div class="form-subtitle">DCF Modeli Varsayımları</div>
-        <div class="info-box" style="margin-bottom:16px">
-          <span class="info-box-icon">⚙️</span>
-          <span>Bu değerler DCF (İndirgenmiş Nakit Akışı) modeli için kullanılır. Piyasa veya analist tahminlerine göre doldurun.</span>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">İskonto Oranı / WACC (%)</label>
-            <input class="form-input" type="number" id="wacc" placeholder="ör. 18" />
-            <span class="form-hint">Türkiye için genellikle %15–25 arası</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Terminal Büyüme Oranı (%)</label>
-            <input class="form-input" type="number" id="termgrowth" placeholder="ör. 5" />
-            <span class="form-hint">Uzun vadeli sürdürülebilir büyüme</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Projeksiyon Yılı (yıl)</label>
-            <input class="form-input" type="number" id="projyears" placeholder="ör. 5" min="3" max="10" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Yıllık FCF Büyüme Tahmini (%)</label>
-            <input class="form-input" type="number" id="fcfgrowth" placeholder="ör. 12" />
-          </div>
-        </div>
-      </div>
-
-      <div class="btn-group">
-        <button class="btn btn-secondary" onclick="showPage('balance', document.getElementById('nav-balance'))">← Geri</button>
-        <button class="btn btn-success" onclick="saveCashflow()">✓ Analizi Başlat</button>
-      </div>
-    </section>
-
-    <!-- ─── Analysis Page (placeholder) ─── -->
-    <section class="page" id="page-analysis">
-      <div class="section-header">
-        <div class="section-label">Sonuç</div>
-        <h2 class="section-title">Finansal Analiz</h2>
-        <p class="section-desc">Veriler kaydedildikten sonra burada analiz sonuçları ve güven skoru görünecek.</p>
-      </div>
-
-      <div class="card" style="text-align:center;padding:48px">
-        <div style="font-size:48px;margin-bottom:16px">🔬</div>
-        <div style="font-family:var(--font-display);font-size:18px;font-weight:600;margin-bottom:8px">Analiz Motoru Hazırlanıyor</div>
-        <div style="color:var(--text-secondary);font-size:14px;max-width:360px;margin:0 auto 24px">
-          Adım 2'de analiz motoru, güven skoru hesaplayıcısı ve görsel raporlar eklenecek. Önce 3 veri girişini tamamla.
-        </div>
-        <button class="btn btn-primary" onclick="showPage('income', document.getElementById('nav-income'))">
-          Veri Girişine Git →
-        </button>
-      </div>
-    </section>
-
-  </main>
+</main>
 </div>
+<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg">Kaydedildi</span></div>
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <div class="logo"><div class="logo-mark">IQ</div><span>Invest<span class="logo-sub">IQ</span></span></div>
+  <span class="header-badge">v2.0</span>
+</header>
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('welcome',this)">🏠 Ana Sayfa</button>
+  <button class="nav-btn" id="nav-income" onclick="showPage('income',this)">📊 Gelir <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-balance" onclick="showPage('balance',this)">🏦 Bilanco <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-cashflow" onclick="showPage('cashflow',this)">💸 Nakit <span class="nav-dot"></span></button>
+  <button class="nav-btn" id="nav-analysis" onclick="showPage('analysis',this)">🔬 Analiz <span class="nav-dot"></span></button>
+</nav>
+<main class="main">
 
-<!-- Toast -->
-<div class="toast" id="toast">
-  <span id="toast-icon">✓</span>
-  <span id="toast-msg">Kaydedildi</span>
+<section class="page active" id="page-welcome">
+  <div class="welcome">
+    <div class="welcome-icon">📈</div>
+    <h1 class="welcome-title">Invest<span>IQ</span></h1>
+    <p class="welcome-desc">8 finansal analiz yontemini birlestiren, kesinlik iddia etmeden yuksek guven skoruyla yatirim karari sunan akilli sistem.</p>
+    <div class="welcome-features">
+      <div class="feature-card"><div class="feature-icon">📐</div><div class="feature-title">20+ Rasyo</div><div class="feature-desc">Likidite, karlilik, faaliyet ve kaldirac oranlari</div></div>
+      <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Guven Skoru</div><div class="feature-desc">Agirlikli 0-100 puan sistemi</div></div>
+      <div class="feature-card"><div class="feature-icon">📉</div><div class="feature-title">DCF Modeli</div><div class="feature-desc">Icsel deger ve piyasa karsilastirmasi</div></div>
+      <div class="feature-card"><div class="feature-icon">🚦</div><div class="feature-title">Karar Raporu</div><div class="feature-desc">Al / Bekle / Sat onerisi ve gerekcesi</div></div>
+    </div>
+    <button class="btn btn-primary" style="font-size:14px;padding:12px 28px" onclick="showPage('income',document.getElementById('nav-income'))">Analize Basla →</button>
+  </div>
+</section>
+
+<section class="page" id="page-income">
+  <div class="section-header">
+    <div class="section-label">Adim 1 / 3</div>
+    <h2 class="section-title">Gelir Tablosu</h2>
+    <p class="section-desc">Son 2 yila ait gelir tablosu verilerini girin. Tum degerler TL Bin.</p>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-step active"><div class="step-circle">1</div><span>Gelir</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">2</div><span>Bilanco</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">3</div><span>Nakit</span></div>
+    <div class="progress-connector"></div>
+    <div class="progress-step"><div class="step-circle">4</div><span>Analiz</span></div>
+  </div>
+  <div class="info-box"><span class="info-box-icon">💡</span><span>Degerleri TL Bin olarak girin. Bos birakilan alanlar hesaplamanin disinda tutulur.</span></div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon blue">🏢</div>Sirket Bilgileri</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Sirket / Sembol</label><input class="form-input" id="company_name" placeholder="or. THYAO"/></div>
+      <div class="form-group"><label class="form-label">Donem 1 (Onceki)</label><input class="form-input" type="number" id="year1" placeholder="2022"/></div>
+      <div class="form-group"><label class="form-label">Donem 2 (Son)</label><input class="form-input" type="number" id="year2" placeholder="2023"/></div>
+      <div class="form-group"><label class="form-label">Sektor</label>
+        <select class="form-input" id="sector">
+          <option value="">Seciniz...</option>
+          <option value="manufacturing">Uretim / Sanayi</option>
+          <option value="retail">Perakende</option>
+          <option value="technology">Teknoloji</option>
+          <option value="finance">Finans</option>
+          <option value="energy">Enerji</option>
+          <option value="healthcare">Saglik</option>
+          <option value="construction">Insaat / GYO</option>
+          <option value="other">Diger</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon blue">💰</div>Gelir ve Kar (TL Bin)</div>
+    <div class="form-subtitle">Satislar ve Maliyet</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Net Satislar D1</label><input class="form-input" type="number" id="revenue1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Satislar D2</label><input class="form-input" type="number" id="revenue2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Satis Maliyeti D1</label><input class="form-input" type="number" id="cogs1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Satis Maliyeti D2</label><input class="form-input" type="number" id="cogs2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Faaliyet Giderleri D1</label><input class="form-input" type="number" id="opex1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Faaliyet Giderleri D2</label><input class="form-input" type="number" id="opex2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">FAVOK / EBITDA D1</label><input class="form-input" type="number" id="ebitda1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">FAVOK / EBITDA D2</label><input class="form-input" type="number" id="ebitda2" placeholder="0"/></div>
+    </div>
+    <hr class="form-divider"/>
+    <div class="form-subtitle">Net Kar</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Finansman Gideri D1</label><input class="form-input" type="number" id="interest1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman Gideri D2</label><input class="form-input" type="number" id="interest2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D1</label><input class="form-input" type="number" id="ebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Vergi Oncesi Kar D2</label><input class="form-input" type="number" id="ebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Kar D1</label><input class="form-input" type="number" id="netincome1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Net Kar D2</label><input class="form-input" type="number" id="netincome2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Amortisman D1</label><input class="form-input" type="number" id="da1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Amortisman D2</label><input class="form-input" type="number" id="da2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="saveIncome()">Kaydet ve Devam →</button>
+    <button class="btn btn-secondary" onclick="clearSection('income')">Temizle</button>
+  </div>
+</section>
+
+<section class="page" id="page-balance">
+  <div class="section-header">
+    <div class="section-label">Adim 2 / 3</div>
+    <h2 class="section-title">Bilanco</h2>
+    <p class="section-desc">Varlik, borc ve ozkaynak verileri. TL Bin cinsinden.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon teal">🏗️</div>Donen Varliklar (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Nakit D1</label><input class="form-input" type="number" id="cash1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Nakit D2</label><input class="form-input" type="number" id="cash2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Alacaklar D1</label><input class="form-input" type="number" id="receivables1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Alacaklar D2</label><input class="form-input" type="number" id="receivables2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Stoklar D1</label><input class="form-input" type="number" id="inventory1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Stoklar D2</label><input class="form-input" type="number" id="inventory2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Donen Varlik D1</label><input class="form-input" type="number" id="currentassets1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Donen Varlik D2</label><input class="form-input" type="number" id="currentassets2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Maddi Duran Varlik D1</label><input class="form-input" type="number" id="ppe1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Maddi Duran Varlik D2</label><input class="form-input" type="number" id="ppe2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Varlik D1</label><input class="form-input" type="number" id="totalassets1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Varlik D2</label><input class="form-input" type="number" id="totalassets2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon teal">📋</div>Borclar ve Ozkaynaklar (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="shortdebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Kisa Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="shortdebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Borclar D1</label><input class="form-input" type="number" id="payables1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ticari Borclar D2</label><input class="form-input" type="number" id="payables2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D1</label><input class="form-input" type="number" id="currentliabilities1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Kisa Vadeli Borc D2</label><input class="form-input" type="number" id="currentliabilities2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D1</label><input class="form-input" type="number" id="longdebt1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Uzun Vadeli Finansal Borc D2</label><input class="form-input" type="number" id="longdebt2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Borc D1</label><input class="form-input" type="number" id="totalliabilities1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Toplam Borc D2</label><input class="form-input" type="number" id="totalliabilities2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ozkaynaklar D1</label><input class="form-input" type="number" id="equity1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Ozkaynaklar D2</label><input class="form-input" type="number" id="equity2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Hisse Sayisi (Bin adet)</label><input class="form-input" type="number" id="shares2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Guncel Hisse Fiyati (TL)</label><input class="form-input" type="number" id="stockprice" placeholder="42.50"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="showPage('income',document.getElementById('nav-income'))">← Geri</button>
+    <button class="btn btn-primary" onclick="saveBalance()">Kaydet ve Devam →</button>
+  </div>
+</section>
+
+<section class="page" id="page-cashflow">
+  <div class="section-header">
+    <div class="section-label">Adim 3 / 3</div>
+    <h2 class="section-title">Nakit Akis Tablosu</h2>
+    <p class="section-desc">Nakit akislari ve DCF model parametreleri. TL Bin cinsinden.</p>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon green">🔄</div>Nakit Akislari (TL Bin)</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Isletme NCF D1</label><input class="form-input" type="number" id="cfo1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Isletme NCF D2</label><input class="form-input" type="number" id="cfo2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">CapEx D1</label><input class="form-input" type="number" id="capex1" placeholder="negatif girin"/></div>
+      <div class="form-group"><label class="form-label">CapEx D2</label><input class="form-input" type="number" id="capex2" placeholder="negatif girin"/></div>
+      <div class="form-group"><label class="form-label">Yatirim NCF D1</label><input class="form-input" type="number" id="cfi1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Yatirim NCF D2</label><input class="form-input" type="number" id="cfi2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman NCF D1</label><input class="form-input" type="number" id="cff1" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Finansman NCF D2</label><input class="form-input" type="number" id="cff2" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Odenen Temettu D2</label><input class="form-input" type="number" id="dividends2" placeholder="0"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="card-icon purple">⚙️</div>DCF Model Parametreleri</div>
+    <div class="info-box" style="margin-bottom:14px"><span class="info-box-icon">📌</span><span>Turkiye piyasasi icin tipik degerler: WACC %15-25, Terminal buyume %3-6</span></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Iskonto Orani / WACC (%)</label><input class="form-input" type="number" id="wacc" placeholder="18"/></div>
+      <div class="form-group"><label class="form-label">Terminal Buyume Orani (%)</label><input class="form-input" type="number" id="termgrowth" placeholder="5"/></div>
+      <div class="form-group"><label class="form-label">Projeksiyon Yili</label><input class="form-input" type="number" id="projyears" placeholder="5" min="3" max="10"/></div>
+      <div class="form-group"><label class="form-label">Yillik FCF Buyume Tahmini (%)</label><input class="form-input" type="number" id="fcfgrowth" placeholder="12"/></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="showPage('balance',document.getElementById('nav-balance'))">← Geri</button>
+    <button class="btn btn-success" onclick="saveCashflowAndAnalyze()">✓ Analizi Calistir</button>
+  </div>
+</section>
+
+<section class="page" id="page-analysis">
+  <div class="section-header">
+    <div class="section-label">Sonuc Raporu</div>
+    <h2 class="section-title" id="analysis-title">Finansal Analiz</h2>
+    <p class="section-desc" id="analysis-subtitle">Veri girisini tamamlayarak analizi baslatin.</p>
+  </div>
+  <div id="analysis-content">
+    <div class="card" style="text-align:center;padding:40px">
+      <div style="font-size:44px;margin-bottom:14px">🔬</div>
+      <div style="font-family:var(--font-display);font-size:17px;font-weight:600;margin-bottom:8px">Henuz Veri Girilmedi</div>
+      <div style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">3 adimi tamamlayip Analizi Calistir butonuna basin.</div>
+      <button class="btn btn-primary" onclick="showPage('income',document.getElementById('nav-income'))">Veri Girisine Git →</button>
+    </div>
+  </div>
+</section>
+
+</main>
 </div>
-
-<script>
-// ─── State ───
-const state = {
-  income: null,
-  balance: null,
-  cashflow: null
-};
-
-// ─── Navigation ───
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-}
-
-// ─── Toast ───
-function showToast(msg, icon = '✓') {
-  const t = document.getElementById('toast');
-  document.getElementById('toast-msg').textContent = msg;
-  document.getElementById('toast-icon').textContent = icon;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ─── Save helpers ───
-function g(id) {
-  const el = document.getElementById(id);
-  if (!el) return null;
-  return el.type === 'number' ? (parseFloat(el.value) || null) : el.value.trim() || null;
-}
-
-function markNavDone(navId) {
-  const btn = document.getElementById(navId);
-  if (btn) btn.classList.add('has-data');
-}
-
-function saveIncome() {
-  const rev2 = g('revenue2');
-  if (!rev2) { showToast('Lütfen en az Net Satışlar (D2) girin', '⚠️'); return; }
-
-  state.income = {
-    company: g('company_name'), year1: g('year1'), year2: g('year2'), sector: g('sector'),
-    revenue: [g('revenue1'), rev2],
-    cogs: [g('cogs1'), g('cogs2')],
-    opex: [g('opex1'), g('opex2')],
-    ebitda: [g('ebitda1'), g('ebitda2')],
-    interest: [g('interest1'), g('interest2')],
-    ebt: [g('ebt1'), g('ebt2')],
-    netincome: [g('netincome1'), g('netincome2')],
-    da: [g('da1'), g('da2')]
-  };
-  localStorage.setItem('iq_income', JSON.stringify(state.income));
-  markNavDone('nav-income');
-  showToast('Gelir tablosu kaydedildi ✓');
-  showPage('balance', document.getElementById('nav-balance'));
-}
-
-function saveBalance() {
-  const ta2 = g('totalassets2');
-  if (!ta2) { showToast('Lütfen en az Toplam Varlık (D2) girin', '⚠️'); return; }
-
-  state.balance = {
-    cash: [g('cash1'), g('cash2')],
-    shortinv: [g('shortinv1'), g('shortinv2')],
-    receivables: [g('receivables1'), g('receivables2')],
-    inventory: [g('inventory1'), g('inventory2')],
-    currentassets: [g('currentassets1'), g('currentassets2')],
-    ppe: [g('ppe1'), g('ppe2')],
-    totalassets: [g('totalassets1'), ta2],
-    shortdebt: [g('shortdebt1'), g('shortdebt2')],
-    payables: [g('payables1'), g('payables2')],
-    currentliabilities: [g('currentliabilities1'), g('currentliabilities2')],
-    longdebt: [g('longdebt1'), g('longdebt2')],
-    totalliabilities: [g('totalliabilities1'), g('totalliabilities2')],
-    equity: [g('equity1'), g('equity2')],
-    shares: g('shares2'),
-    stockprice: g('stockprice')
-  };
-  localStorage.setItem('iq_balance', JSON.stringify(state.balance));
-  markNavDone('nav-balance');
-  showToast('Bilanço kaydedildi ✓');
-  showPage('cashflow', document.getElementById('nav-cashflow'));
-}
-
-function saveCashflow() {
-  const cfo2 = g('cfo2');
-  if (!cfo2) { showToast('Lütfen en az İşletme NCF (D2) girin', '⚠️'); return; }
-
-  state.cashflow = {
-    cfo: [g('cfo1'), cfo2],
-    capex: [g('capex1'), g('capex2')],
-    cfi: [g('cfi1'), g('cfi2')],
-    cff: [g('cff1'), g('cff2')],
-    dividends: g('dividends2'),
-    wacc: g('wacc') || 18,
-    termgrowth: g('termgrowth') || 5,
-    projyears: g('projyears') || 5,
-    fcfgrowth: g('fcfgrowth') || 10
-  };
-  localStorage.setItem('iq_cashflow', JSON.stringify(state.cashflow));
-  markNavDone('nav-cashflow');
-  showToast('Nakit akışı kaydedildi! Analiz hazırlanıyor...', '🚀');
-  setTimeout(() => showPage('analysis', document.getElementById('nav-analysis')), 1200);
-}
-
-function clearSection(section) {
-  if (!confirm('Bu bölümün verilerini temizlemek istiyor musun?')) return;
-  const inputs = document.querySelectorAll(`#page-${section} input, #page-${section} select`);
-  inputs.forEach(i => i.value = '');
-  showToast('Temizlendi', '🗑️');
-}
-
-// ─── PWA Install ───
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').classList.add('show');
-});
-
-function installPWA() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => { deferredPrompt = null; dismissInstall(); });
-}
-function dismissInstall() {
-  document.getElementById('installBanner').classList.remove('show');
-}
-
-// ─── Load saved data ───
-window.addEventListener('DOMContentLoaded', () => {
-  ['income', 'balance', 'cashflow'].forEach(k => {
-    const saved = localStorage.getItem('iq_' + k);
-    if (saved) {
-      state[k] = JSON.parse(saved);
-      const navMap = { income: 'nav-income', balance: 'nav-balance', cashflow: 'nav-cashflow' };
-      markNavDone(navMap[k]);
-    }
-  });
-});
-
-// ─── Service Worker ───
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
-</script>
-
-</body>
-</html>
+<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg">Kaydedildi</span></div>

@@ -633,7 +633,7 @@ window.addEventListener('DOMContentLoaded',loadSaved);
   btn.textContent='⏳ Yukleniyor...';btn.disabled=true;
   status.textContent='Veri cekiliyor: '+ticker+'...';
   const modules='incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,summaryDetail,defaultKeyStatistics,financialData';
-  const url='https://query1.finance.yahoo.com/v10/finance/quoteSummary/'+ticker+'?modules='+modules+'&lang=en&region=TR';
+const url='https://query2.finance.yahoo.com/v10/finance/quoteSummary/'+ticker+'?modules='+modules+'&crumb=&lang=en-US&region=US&corsDomain=finance.yahoo.com';
   const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
   fetch(proxy)
     .then(r=>{if(!r.ok)throw new Error('Ag hatasi');return r.json();})

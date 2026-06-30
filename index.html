@@ -751,30 +751,49 @@ function fetchFMP() {
   status.textContent = 'Veri cekiliyor: ' + ticker + '...';
 
   var base = 'https://financialmodelingprep.com/stable';
-  var urls = [
-    base + '/income-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
-    base + '/balance-sheet-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
-    base + '/cash-flow-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
-    base + '/quote?symbol=' + ticker + '&apikey=' + FMP_KEY
-  ];
 
-  Promise.all(urls.map(function(u){
-    return fetch(u).then(function(r){ return r.json(); });
-  })).then(function(results){
-    var inc = results[0], bal = results[1], cf = results[2], quote = results[3];
-    if (inc && inc['Error Message']) { throw new Error(inc['Error Message']); }
-    if (!inc || !Array.isArray(inc) || inc.length === 0) {
-      throw new Error('Sembol bulunamadi: ' + ticker + '. BIST hisseleri desteklenmiyor olabilir.');
-    }
-    fillFMP(inc, bal, cf, quote, ticker);
-    btn.textContent = 'Yuklendi'; btn.disabled = false;
-    status.textContent = ticker + ' verileri yuklendi. Eksik alanlar varsa manuel girin.';
-    showToast('Veriler yuklendi!');
-  }).catch(function(err){
-    btn.textContent = 'Veri Cek'; btn.disabled = false;
-    status.textContent = 'Hata: ' + err.message;
-    showToast('Hata: ' + err.message, '❌');
-  });
+  function fetchJSON(label, url) {
+    return fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (data && data['Error Message']) {
+        throw new Error(label + ' hatasi: ' + data['Error Message']);
+      }
+      return data;
+    });
+  }
+
+  var inc, bal, cf, quote;
+
+  fetchJSON('Gelir tablosu', base + '/income-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY)
+    .then(function(data){
+      inc = data;
+      status.textContent = 'Gelir tablosu alindi, bilanco cekiliyor...';
+      if (!inc || !Array.isArray(inc) || inc.length === 0) {
+        throw new Error('Sembol bulunamadi: ' + ticker + '. BIST hisseleri desteklenmiyor olabilir.');
+      }
+      return fetchJSON('Bilanco', base + '/balance-sheet-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY);
+    })
+    .then(function(data){
+      bal = data;
+      status.textContent = 'Bilanco alindi, nakit akisi cekiliyor...';
+      return fetchJSON('Nakit akisi', base + '/cash-flow-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY);
+    })
+    .then(function(data){
+      cf = data;
+      status.textContent = 'Nakit akisi alindi, fiyat bilgisi cekiliyor...';
+      return fetchJSON('Fiyat', base + '/quote?symbol=' + ticker + '&apikey=' + FMP_KEY);
+    })
+    .then(function(data){
+      quote = data;
+      fillFMP(inc, bal, cf, quote, ticker);
+      btn.textContent = 'Yuklendi'; btn.disabled = false;
+      status.textContent = ticker + ' verileri yuklendi. Eksik alanlar varsa manuel girin.';
+      showToast('Veriler yuklendi!');
+    })
+    .catch(function(err){
+      btn.textContent = 'Veri Cek'; btn.disabled = false;
+      status.textContent = 'Hata: ' + err.message;
+      showToast('Hata: ' + err.message, '❌');
+    });
 }
 
 function fillFMP(inc, bal, cf, quote, ticker) {

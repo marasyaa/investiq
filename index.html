@@ -750,20 +750,21 @@ function fetchFMP() {
   btn.textContent = 'Yukleniyor...'; btn.disabled = true;
   status.textContent = 'Veri cekiliyor: ' + ticker + '...';
 
-  var base = 'https://financialmodelingprep.com/api/v3';
+  var base = 'https://financialmodelingprep.com/stable';
   var urls = [
-    base + '/income-statement/' + ticker + '?limit=2&apikey=' + FMP_KEY,
-    base + '/balance-sheet-statement/' + ticker + '?limit=2&apikey=' + FMP_KEY,
-    base + '/cash-flow-statement/' + ticker + '?limit=2&apikey=' + FMP_KEY,
-    base + '/quote/' + ticker + '?apikey=' + FMP_KEY
+    base + '/income-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
+    base + '/balance-sheet-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
+    base + '/cash-flow-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY,
+    base + '/quote?symbol=' + ticker + '&apikey=' + FMP_KEY
   ];
 
   Promise.all(urls.map(function(u){
     return fetch(u).then(function(r){ return r.json(); });
   })).then(function(results){
     var inc = results[0], bal = results[1], cf = results[2], quote = results[3];
+    if (inc && inc['Error Message']) { throw new Error(inc['Error Message']); }
     if (!inc || !Array.isArray(inc) || inc.length === 0) {
-      throw new Error('Sembol bulunamadi: ' + ticker);
+      throw new Error('Sembol bulunamadi: ' + ticker + '. BIST hisseleri desteklenmiyor olabilir.');
     }
     fillFMP(inc, bal, cf, quote, ticker);
     btn.textContent = 'Yuklendi'; btn.disabled = false;

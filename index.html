@@ -753,29 +753,34 @@ function fetchFMP() {
   var base = 'https://financialmodelingprep.com/stable';
 
   function fetchJSON(label, url) {
-    return fetch(url).then(function(r){ return r.json(); }).then(function(data){
-      if (data && data['Error Message']) {
-        throw new Error(label + ' hatasi: ' + data['Error Message']);
-      }
-      return data;
+    return fetch(url).then(function(r){
+      return r.text().then(function(txt){
+        var data;
+        try { data = JSON.parse(txt); }
+        catch(e) { throw new Error(label + ': API gecersiz yanit dondurdu -> ' + txt.substring(0,120)); }
+        if (data && data['Error Message']) {
+          throw new Error(label + ' hatasi: ' + data['Error Message']);
+        }
+        return data;
+      });
     });
   }
 
   var inc, bal, cf, quote;
 
-  fetchJSON('Gelir tablosu', base + '/income-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY)
+  fetchJSON('Gelir tablosu', base + '/income-statement?symbol=' + ticker + '&apikey=' + FMP_KEY)
     .then(function(data){
       inc = data;
       status.textContent = 'Gelir tablosu alindi, bilanco cekiliyor...';
       if (!inc || !Array.isArray(inc) || inc.length === 0) {
         throw new Error('Sembol bulunamadi: ' + ticker + '. BIST hisseleri desteklenmiyor olabilir.');
       }
-      return fetchJSON('Bilanco', base + '/balance-sheet-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY);
+      return fetchJSON('Bilanco', base + '/balance-sheet-statement?symbol=' + ticker + '&apikey=' + FMP_KEY);
     })
     .then(function(data){
       bal = data;
       status.textContent = 'Bilanco alindi, nakit akisi cekiliyor...';
-      return fetchJSON('Nakit akisi', base + '/cash-flow-statement?symbol=' + ticker + '&limit=2&apikey=' + FMP_KEY);
+      return fetchJSON('Nakit akisi', base + '/cash-flow-statement?symbol=' + ticker + '&apikey=' + FMP_KEY);
     })
     .then(function(data){
       cf = data;
@@ -794,7 +799,7 @@ function fetchFMP() {
       status.textContent = 'Hata: ' + err.message;
       showToast('Hata: ' + err.message, '❌');
     });
-}
+  }
 
 function fillFMP(inc, bal, cf, quote, ticker) {
   function set(id, val) {
